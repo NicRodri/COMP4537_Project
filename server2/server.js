@@ -43,6 +43,70 @@ class App {
     }
 
     setupRoutes() {
+        const createUserRoute = async (req, res) => {
+            if (req.method === 'POST') {
+                let body = "";
+                req.on("data", (chunk) => { body += chunk; });
+                req.on("end", async () => {
+                    try {
+                        // Parse the request body
+                        const { username, email, password } = JSON.parse(body);
+
+                        // Input validation
+                        if (!username || !email || !password) {
+                            res.writeHead(400, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ message: "All fields are required" }));
+                            return;
+                        }
+
+                        // Additional validation (e.g., email format, password strength) can be added here
+
+                        // Initialize DB connection
+                        const connection = await initializeDB();
+
+                        // Check if the email or username already exists
+                        const checkUserQuery = 'SELECT id FROM users WHERE email = ? OR username = ?';
+                        const [existingUsers] = await connection.query(checkUserQuery, [email, username]);
+
+                        if (existingUsers.length > 0) {
+                            res.writeHead(409, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ message: "Email or username already exists" }));
+                            return;
+                        }
+
+                        // Hash the password using bcrypt
+                        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+                        // Insert the new user into the database
+                        const insertUserQuery = 'INSERT INTO users (username, email, password, user_type) VALUES (?, ?, ?, ?)';
+                        await connection.query(insertUserQuery, [username, email, hashedPassword, 'user']);
+
+                        // Optionally, log the user in immediately after registration
+                        // Generate session ID and CSRF token
+                        const sessionId = uuidv4();
+                        const createdAt = new Date();
+                        const expiresAt = new Date(Date.now() + SESSION_EXPIRATION_TIME);
+
+                        // Save the session in the database
+                        const sessionQuery = 'INSERT INTO sessions (session_id, user_id, created_at, expires_at) VALUES (?, LAST_INSERT_ID(), ?, ?)';
+                        await connection.query(sessionQuery, [sessionId, createdAt, expiresAt]);
+
+                        // Set the session cookie with secure attributes
+                        res.setHeader('Set-Cookie', `session_id=${sessionId}; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60}; Path=/`);
+
+                        res.writeHead(201, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ message: "User created successfully"}));
+                    } catch (error) {
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ message: "Internal server error" }));
+                    }
+                });
+            } else {
+                res.writeHead(405, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Method not allowed" }));
+            }
+        };
+
         // Define login route
         const loginRoute = async (req, res) => {
             if (req.method === 'POST') {
@@ -51,122 +115,136 @@ class App {
                 req.on("end", async () => {
                     try {
                         const { email, password } = JSON.parse(body);
-                        console.log("Attempting login for email:", email);
-
                         const userQuery = 'SELECT * FROM users WHERE email = ?';
-
-                        console.log("Executing query:", userQuery);
-                        console.log("With parameter:", email);
-
-                        // Fetch user by email
                         const connection = await initializeDB();
                         const [rows] = await connection.query(userQuery, [email]);
-                        console.log("Raw query result:", rows);
 
                         if (rows.length === 0) {
-                            console.log("No user found with this email");
-                            respondWithJSON(res, { message: MESSAGES.INVALID_CREDENTIALS }, 401);
+                            res.writeHead(401, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ message: "Invalid credentials" }));
                             return;
                         }
 
                         const user = rows[0];
-                        console.log("User object:", user);
-
-                        if (!user.password) {
-                            console.log("Password is undefined in the user object");
-                            respondWithJSON(res, { message: MESSAGES.SERVER_ERROR }, 500);
-                            return;
-                        }
-
-                        // Compare passwords
                         const isValidPassword = await bcrypt.compare(password, user.password);
-                        console.log("Is password valid?", isValidPassword);
 
                         if (!isValidPassword) {
-                            respondWithJSON(res, { message: MESSAGES.INVALID_CREDENTIALS }, 401);
+                            res.writeHead(401, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ message: "Invalid credentials" }));
                             return;
                         }
 
-                        // On successful login, generate JWT
-                        const token = jwt.sign(
-                            { userId: user.id, email: user.email, role: user.user_type },
-                            SECRET_KEY,
-                            { expiresIn: '1h' }  // Token expires in 1 hour
-                        );
-                        console.log("JWT generated");
+                        // Create a new session
+                        const sessionId = uuidv4(); // Generate unique session ID
+                        const createdAt = new Date(); // Timestamp for session creation
+                        const expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour expiration
 
-                        // Send JWT to client (as part of JSON response)
-                        respondWithJSON(res, {
-                            message: "Login successful",
-                            token: token,  // Send JWT token to client
-                            user: {
-                                id: user.id,
-                                email: user.email,
-                                userType: user.user_type
-                            }
-                        }, 200);
+                        // Save the session in the database
+                        // Insert into the sessions table following your table structure
+                        const sessionQuery = 'INSERT INTO sessions (session_id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)';
+                        await connection.query(sessionQuery, [sessionId, user.id, createdAt, expiresAt]);
 
+                        // Set the session cookie
+                        // Set the session cookie with SameSite attribute
+                        res.setHeader('Set-Cookie', `session_id=${sessionId}; HttpOnly; Secure; SameSite=Strict; Max-Age=${60 * 60}; Path=/`);
+
+
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ message: "Login successful", user: { id: user.id, email: user.email, userType: user.user_type } }));
                     } catch (error) {
-                        console.error("Error during login:", error);
-                        respondWithJSON(res, { message: "Internal Server Error" }, 500);
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ message: "Internal server error" }));
                     }
                 });
             } else {
-                res.writeHead(405, { 'Content-Type': 'text/html' });
-                res.end(MESSAGES.INVALID_METHOD);
+                res.writeHead(405, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Method not allowed" }));
             }
         };
 
         // Define protected route
         const protectedRoute = async (req, res) => {
-            // Get the Authorization header
-            const authHeader = req.headers['authorization'];
+            const cookies = parseCookies(req);  // Parse cookies from the request
+            const sessionId = cookies.session_id;  // Retrieve the session ID from the cookie
 
-            if (!authHeader) {
-                respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
-                return;
-            }
-
-            // Extract the token from the Authorization header
-            const token = authHeader.split(' ')[1];  // Assuming the header format is 'Bearer <token>'
-
-            if (!token) {
-                respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
+            if (!sessionId) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Not authenticated" }));
                 return;
             }
 
             try {
-                // Verify the JWT token
-                const decoded = jwt.verify(token, SECRET_KEY);  // Decode and verify the token
-
-                // At this point, the token is valid, and the user information is decoded.
-                // decoded will contain the payload (e.g., userId, role, etc.)
-                console.log('Decoded JWT:', decoded);
-
-                // Optionally, you can fetch more user details from the database if necessary
-                const userQuery = 'SELECT user_type FROM users WHERE id = ?';
                 const connection = await initializeDB();
-                const [userResult] = await connection.query(userQuery, [decoded.userId]);
+                const sessionQuery = 'SELECT * FROM sessions WHERE session_id = ? AND expires_at > NOW()';
+                const [sessionRows] = await connection.query(sessionQuery, [sessionId]);
 
-                if (userResult.length === 0) {
-                    respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
+                if (sessionRows.length === 0) {
+                    res.writeHead(403, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ message: "Session expired or invalid" }));
                     return;
                 }
 
-                // If user exists and token is valid, proceed with the request
-                respondWithJSON(res, {
-                    message: MESSAGES.SUCCESS_QUERY,
-                    user_type: userResult[0].user_type // Include user_type in the response
-                });
+                // Parse session data
+                // Instead of parsing session data, directly use the user_id from the session row
+                const userId = sessionRows[0].user_id;
 
+                // Optionally, fetch additional user details if necessary
+                const userQuery = 'SELECT id, email, user_type FROM users WHERE id = ?';
+                const [userRows] = await connection.query(userQuery, [userId]);
+
+                if (userRows.length === 0) {
+                    res.writeHead(403, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ message: "User not found" }));
+                    return;
+                }
+
+                // Respond with the user details
+                const user = userRows[0];
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    message: "Protected resource accessed",
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        userType: user.user_type
+                    }
+                }));
             } catch (error) {
-                console.error("Error during JWT validation:", error);
-                respondWithJSON(res, { message: "Invalid or expired token" }, 403);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Internal server error" }));
             }
         };
 
+        const logoutRoute = async (req, res) => {
+            const cookies = parseCookies(req);
+            const sessionId = cookies.session_id;
+
+            if (!sessionId) {
+                res.writeHead(403, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Not authenticated" }));
+                return;
+            }
+
+            try {
+                const connection = await initializeDB();
+                const deleteQuery = 'DELETE FROM sessions WHERE session_id = ?';
+                await connection.query(deleteQuery, [sessionId]);
+
+                // Clear the session cookie with SameSite attribute and Max-Age=0
+                res.setHeader('Set-Cookie', 'session_id=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/');
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Logout successful" }));
+            } catch (error) {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: "Internal server error" }));
+            }
+        };
+        this.router.addRoute('/register', createUserRoute);
+
         this.router.addRoute('/login', loginRoute);
         this.router.addRoute('/protected', protectedRoute);
+        this.router.addRoute('/logout', logoutRoute);
     }
 
     start() {
@@ -235,7 +313,7 @@ function parseCookies(req) {
 function setCorsHeaders(req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Credentials", "true"); // This allows sending cookies cross-origin
-    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
     // Handle CORS preflight request
