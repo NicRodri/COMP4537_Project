@@ -1,24 +1,19 @@
-const mysql = require('mysql');
+const mysql = require('mysql2/promise');
 const dbConfig = require('./dbConfig');
-const connection = mysql.createConnection(dbConfig);
 
-// Connect to the database
-connection.connect((err) => {
-    if (err) throw err;
-    console.log("Connected to the 'isa_project' database.");
+async function initializeDB() {
+    try {
+        // Create a connection using async/await
+        const connection = await mysql.createConnection(dbConfig);
+        console.log("Connected to the 'isa_project' database.");
+        
+        // Return the connection to use it in other parts of the app
+        return connection;
+    } catch (err) {
+        console.error("Error connecting to the database:", err);
+        throw err;
+    }
+}
 
-    // Create the patient table if it doesn't exist
-    const createTableSQL = `
-        CREATE TABLE IF NOT EXISTS patient (
-            patientid INT(11) AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-            dateOfBirth DATETIME
-        ) ENGINE=InnoDB;
-    `;
-    connection.query(createTableSQL, (err) => {
-        if (err) throw err;
-        console.log("Table 'patient' created or already exists.");
-    });
-});
+module.exports = initializeDB;
 
-module.exports = connection;
