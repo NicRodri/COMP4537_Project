@@ -13,6 +13,27 @@ const PORT = 6000;
 const saltRounds = 12;  // for bcrypt
 const SESSION_EXPIRATION_TIME = 1 * 60 * 60 * 1000; // 1 hour
 
+// async function createUser(username, email, password, userType = 'user') {
+//     try {
+//         // Hash the password using bcrypt
+//         const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+//         // SQL query to insert the user into the database
+//         const insertQuery = INSERT INTO users (username, email, password, user_type) VALUES (?, ?, ?, ?);
+
+//         // Execute the query
+//         await db.query(insertQuery, [username, email, hashedPassword, userType]);
+
+//         console.log(User ${username} created successfully!);
+//     } catch (error) {
+//         console.error('Error creating user:', error);
+//     }
+// }
+
+// // Usage Example
+// createUser('adminUser', 'admin@example.com', 'adminpassword', 'admin');
+// createUser('regularUser', 'user@example.com', 'userpassword', 'user');
+
 class App {
     constructor(port) {
         this.port = port;
