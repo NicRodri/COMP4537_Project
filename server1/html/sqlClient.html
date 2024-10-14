@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Query Client</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>SQL Query Client</h1>
+        <br>
+        <div>
+            <label for="sqlQuery">SQL Query:</label><br>
+            <textarea id="sqlQuery" rows="4" cols="50"></textarea>
+        </div>
+        <br>
+        <button id="submit">Submit</button>
+        <div class="insert-data-section">
+            <h2>Or, insert default data instead</h2>
+            <button id="insert">Insert Data</button>
+        </div>
+        <div id="feedback"></div>
+
+        <br>
+        <button onclick="window.location.href = '../index.html';" id="back">Back to Home</button>
+    </div>
+
+    <script src="../lang/messages/en/user.js"></script>
+    <script src="../js/sqlClient.js"></script>
+</body>
+
+</html>
