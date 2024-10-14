@@ -5,7 +5,7 @@ const connection = mysql.createConnection(dbConfig);
 // Connect to the database
 connection.connect((err) => {
     if (err) throw err;
-    console.log("Connected to the 'lab5DB' database.");
+    console.log("Connected to the 'isa_project' database.");
 
     // Create the patient table if it doesn't exist
     const createTableSQL = `
