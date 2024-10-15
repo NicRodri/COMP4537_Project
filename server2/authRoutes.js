@@ -169,8 +169,6 @@ class AuthRoutes {
             return;
         }
         try {
-            const decoded = jwt.verify(token, SECRET_KEY);
-
             // Log decoded information for debugging
             console.log('Decoded JWT:', decoded);
 
@@ -178,7 +176,10 @@ class AuthRoutes {
             const connection = await initializeDB();
             const [userResult] = await connection.query(userQuery, [decoded.userId]);
 
+            console.log('Decoded userId from token:', decoded.userId);
+
             if (userResult.length === 0) {
+                console.log(MESSAGES.NOT_AUTHENTICATED )
                 respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
                 return;
             }
@@ -224,9 +225,6 @@ class AuthRoutes {
         }
 
         try {
-            // Verify the JWT token
-            const decoded = jwt.verify(token, SECRET_KEY);
-
             // Get the expiry date of the token from its decoded payload (exp is in seconds)
             const expiryDate = new Date(decoded.exp * 1000);  // Convert to milliseconds
 

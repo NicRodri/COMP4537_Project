@@ -13,6 +13,7 @@ const MESSAGES = {
     SUCCESS_QUERY: "Query executed successfully",
     INVALID_INPUT: "Invalid input",
     INVALID_FORMAT: "Invalid format",
+    NOT_AUTHENTICATED: "userResult len  = 0 aka noth authenticated",
 };
 
 
