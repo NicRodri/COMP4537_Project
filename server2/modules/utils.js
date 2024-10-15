@@ -16,8 +16,11 @@ function parseCookies(req) {
 }
 
 function setCorsHeaders(req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Credentials", "true"); // This allows sending cookies cross-origin
+    // const allowedOrigin = req.headers.origin; // Get the origin of the request
+    // console.log(allowedOrigin)
+
+    res.setHeader("Access-Control-Allow-Origin", "*"); // Set the specific origin
+    res.setHeader("Access-Control-Allow-Credentials", "true"); // Allow sending cookies cross-origin
     res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
