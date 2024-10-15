@@ -7,7 +7,7 @@ const { MESSAGES } = require('./lang/messages/en/user');
 const { respondWithJSON, parseCookies, setCorsHeaders } = require('./modules/utils');
 
 // const SQL_QUERY_PATH = 'api/v1/sql';
-const PORT = 6000;
+const PORT = 8080;
 
 class App {
     constructor(port) {
