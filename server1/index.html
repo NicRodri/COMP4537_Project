@@ -1,15 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DB app</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>SQL Client with Authentication</title>
 </head>
+
 <body>
-    <h1>Lab 5 (in pair) DB Intro (Nicolas Rodriguez, Elsa Ho)</h1>
-    <div id="linkContainer">
-        <a href="./html/sqlClient.html" id="sqlClient">Start</a>
+    <h1>SQL Client with Authentication</h1>
+
+    <div id="authForms">
+        <h2>Register</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="registerUsername">Username:</label>
+                <input type="text" id="registerUsername" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <label for="registerEmail">Email:</label>
+                <input type="email" id="registerEmail" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password:</label>
+                <input type="password" id="registerPassword" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" id="registerButton">Register</button>
+        </form>
+    
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginEmail">Email:</label>
+                <input type="email" id="loginEmail" name="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password:</label>
+                <input type="password" id="loginPassword" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" id="loginButton">Login</button>
+        </form>
     </div>
+    
+
+
+
+    <script src="./js/index.js"></script>
 </body>
+
 </html>
