@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Client with Authentication</title>
+    <title>Authentication</title>
 </head>
 
 <body>
-    <h1>SQL Client with Authentication</h1>
+    <h1>Authentication</h1>
 
     <div id="authForms">
         <h2>Register</h2>
@@ -25,7 +25,7 @@
                 <label for="registerPassword">Password:</label>
                 <input type="password" id="registerPassword" name="password" placeholder="Password" required>
             </div>
-            <button type="submit" id="registerButton">Register</button>
+            <button type="button" id="registerButton">Register</button> <!-- Changed to 'button' to prevent form submission -->
         </form>
     
         <h2>Login</h2>
@@ -38,9 +38,10 @@
                 <label for="loginPassword">Password:</label>
                 <input type="password" id="loginPassword" name="password" placeholder="Password" required>
             </div>
-            <button type="submit" id="loginButton">Login</button>
+            <button type="button" id="loginButton">Login</button> <!-- Changed to 'button' to prevent form submission -->
         </form>
     </div>
+    
     
 
 
