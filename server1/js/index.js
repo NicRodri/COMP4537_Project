@@ -1,4 +1,4 @@
-const API_PATH = "http://localhost:8080";  // Ensure the correct URL format (added double slashes)
+const API_PATH = "http://localhost:8080";  // Ensure the correct URL format
 const POST = "POST";
 
 class Authentication {
@@ -14,6 +14,16 @@ class Authentication {
         document.getElementById("loginButton").onclick = () => this.login();
     }
 
+    displayErrorMessage(message) {
+        const errorElement = document.getElementById("errorMessage");
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = "block";
+        } else {
+            alert(message);
+        }
+    }
+
     async register() {
         // Collect data from the registration form
         const username = document.getElementById("registerUsername").value;
@@ -27,18 +37,17 @@ class Authentication {
         };
 
         const xhr = new XMLHttpRequest();
-        xhr.open(POST, `${this.apiPath}/register`);  // Specify correct endpoint, e.g., /register
+        xhr.open(POST, `${this.apiPath}/register`);
         xhr.setRequestHeader("Content-Type", "application/json");
 
         // Handle the response from the server
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) { // Done
+            if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     console.log("Registration successful:", xhr.responseText);
-                    // Do something on success (like redirect or show a message)
+                    // Handle successful registration (e.g., redirect or show success message)
                 } else {
                     console.error("Registration failed:", xhr.responseText);
-                    // Handle errors (like displaying an error message)
                 }
             }
         };
@@ -58,18 +67,21 @@ class Authentication {
         };
 
         const xhr = new XMLHttpRequest();
-        xhr.open(POST, `${this.apiPath}/login`);  // Specify correct endpoint, e.g., /login
+        xhr.open(POST, `${this.apiPath}/login`);
         xhr.setRequestHeader("Content-Type", "application/json");
 
         // Handle the response from the server
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) { // Done
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    console.log("Login successful:", xhr.responseText);
-                    // Do something on success (like redirect or store session data)
+                    const response = JSON.parse(xhr.responseText);  // Parse the JSON response
+                    const token = response.token;  // Assuming the server returns the token in the `token` field
+                    console.log("Login successful:", response);
+
+                    // Store JWT in a cookie with expiration (e.g., 1 hour)
+                    this.setCookie("authToken", token, 1);  // Store for 1 hour
                 } else {
                     console.error("Login failed:", xhr.responseText);
-                    // Handle login errors (like displaying an error message)
                 }
             }
         };
@@ -78,7 +90,56 @@ class Authentication {
         xhr.send(JSON.stringify(data));
     }
 
+    // Helper function to set cookies
+    setCookie(name, value, hours) {
+        let expires = "";
+        if (hours) {
+            const date = new Date();
+            date.setTime(date.getTime() + (hours * 60 * 60 * 1000));  // Cookie expires in `hours` hours
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure";
+    }
+
+    // Helper function to get cookies (if needed for future use)
+    getCookie(name) {
+        const nameEQ = name + "=";
+        const cookiesArray = document.cookie.split(';');
+        for (let i = 0; i < cookiesArray.length; i++) {
+            let cookie = cookiesArray[i];
+            while (cookie.charAt(0) === ' ') cookie = cookie.substring(1, cookie.length);
+            if (cookie.indexOf(nameEQ) === 0) return cookie.substring(nameEQ.length, cookie.length);
+        }
+        return null;
+    }
 }
 
 // Usage
 const auth = new Authentication(API_PATH);
+
+// Function to check if the user is authenticated
+function checkAuthentication() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `${API_PATH}/signedin`, true);
+    xhr.withCredentials = true;  // Include cookies in cross-origin requests
+
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // User is authenticated
+                console.log("User is authenticated.");
+            } else {
+                // User is not authenticated
+                console.log("User is not authenticated.");
+                // window.location.href = './index.html'; // Redirect to login page
+            }
+        }
+    };
+
+    xhr.send();
+}
+
+checkAuthentication();
+
+
+
