@@ -98,7 +98,9 @@ class Authentication {
             date.setTime(date.getTime() + (hours * 60 * 60 * 1000));  // Cookie expires in `hours` hours
             expires = "; expires=" + date.toUTCString();
         }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure";
+        // document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure"; //Made it less secure for now, need to change back when deployment
+        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=None";
+        console.log(name);
     }
 
     // Helper function to get cookies (if needed for future use)
@@ -120,8 +122,11 @@ const auth = new Authentication(API_PATH);
 // Function to check if the user is authenticated
 function checkAuthentication() {
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', `${API_PATH}/signedin`, true);
+    xhr.open('POST', `${API_PATH}/signedin`, true);
     xhr.withCredentials = true;  // Include cookies in cross-origin requests
+
+    token = "Bearer " + auth.getCookie("authToken");
+    xhr.setRequestHeader('Authorization', token);
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
