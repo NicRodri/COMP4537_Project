@@ -80,7 +80,7 @@ class AuthRoutes {
                 );
                 console.log("JWT generated");
 
-                const cookieString = cookie.serialize('authToken', `Bearer ${token}`, {
+                const cookieString = cookie.serialize('authToken', token, {
                     httpOnly: true,  // Prevents client-side access
                     secure: true,    // Ensures cookie is sent over HTTPS
                     maxAge: 60 * 60 * 24, // 1 day in seconds
@@ -141,7 +141,7 @@ class AuthRoutes {
                 );
                 console.log("JWT generated");
 
-                const cookieString = cookie.serialize('authToken', `Bearer ${token}`, {
+                const cookieString = cookie.serialize('authToken', token, {
                     httpOnly: true,  // Prevents client-side access
                     secure: true,    // Ensures cookie is sent over HTTPS
                     maxAge: 60 * 60 * 24, // 1 day in seconds
@@ -178,8 +178,8 @@ class AuthRoutes {
             return;
         }
 
-        const token = decodeURIComponent(authHeader).split(' ')[1];  // Assuming the header format is 'Bearer <token>'
-        console.log(token);
+        const token = authHeader.split('=')[1];  // extracts the value from authheader
+        // console.log(token);
 
         if (!token) {
             respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
@@ -235,7 +235,7 @@ class AuthRoutes {
         }
 
         // Extract the token from the Cookie header
-        const token = decodeURIComponent(authHeader).split(' ')[1];  // Assuming the header format is 'Bearer <token>'
+        const token = authHeader.split('=')[1];  // extracts the value from authheader
         console.log(token);
 
         if (!token) {
