@@ -99,7 +99,7 @@ class Authentication {
             expires = "; expires=" + date.toUTCString();
         }
         // document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure"; //Made it less secure for now, need to change back when deployment
-        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=None";
+        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
         console.log(name);
     }
 
