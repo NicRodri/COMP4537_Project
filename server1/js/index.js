@@ -67,19 +67,16 @@ class Authentication {
         };
 
         const xhr = new XMLHttpRequest();
-        xhr.open(POST, `${this.apiPath}/login`);
+        xhr.open("POST", `${this.apiPath}/login`);  // Use the correct HTTP method string
         xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.withCredentials = true; // Allow cookies to be sent and received
 
         // Handle the response from the server
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     const response = JSON.parse(xhr.responseText);  // Parse the JSON response
-                    const token = response.token;  // Assuming the server returns the token in the `token` field
                     console.log("Login successful:", response);
-
-                    // Store JWT in a cookie with expiration (e.g., 1 hour)
-                    this.setCookie("authToken", token, 1);  // Store for 1 hour
                 } else {
                     console.error("Login failed:", xhr.responseText);
                 }
@@ -88,31 +85,6 @@ class Authentication {
 
         // Send the data as a JSON string
         xhr.send(JSON.stringify(data));
-    }
-
-    // Helper function to set cookies
-    setCookie(name, value, hours) {
-        let expires = "";
-        if (hours) {
-            const date = new Date();
-            date.setTime(date.getTime() + (hours * 60 * 60 * 1000));  // Cookie expires in `hours` hours
-            expires = "; expires=" + date.toUTCString();
-        }
-        // document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict; Secure"; //Made it less secure for now, need to change back when deployment
-        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
-        console.log(name);
-    }
-
-    // Helper function to get cookies (if needed for future use)
-    getCookie(name) {
-        const nameEQ = name + "=";
-        const cookiesArray = document.cookie.split(';');
-        for (let i = 0; i < cookiesArray.length; i++) {
-            let cookie = cookiesArray[i];
-            while (cookie.charAt(0) === ' ') cookie = cookie.substring(1, cookie.length);
-            if (cookie.indexOf(nameEQ) === 0) return cookie.substring(nameEQ.length, cookie.length);
-        }
-        return null;
     }
 }
 
@@ -124,9 +96,6 @@ function checkAuthentication() {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_PATH}/signedin`, true);
     xhr.withCredentials = true;  // Include cookies in cross-origin requests
-
-    token = "Bearer " + auth.getCookie("authToken");
-    xhr.setRequestHeader('Authorization', token);
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {

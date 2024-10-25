@@ -5,6 +5,7 @@ const { MESSAGES } = require('./lang/messages/en/user');
 const { respondWithJSON, parseCookies } = require('./modules/utils');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'your-secret-key';
+const cookie = require('cookie');
 
 
 const saltRounds = 12;  // for bcrypt
@@ -79,6 +80,16 @@ class AuthRoutes {
                 );
                 console.log("JWT generated");
 
+                const cookieString = cookie.serialize('authToken', `Bearer ${token}`, {
+                    httpOnly: true,  // Prevents client-side access
+                    secure: true,    // Ensures cookie is sent over HTTPS
+                    maxAge: 60 * 60 * 24, // 1 day in seconds
+                    path: '/',
+                    sameSite: 'None' // Controls cross-site request behavior
+                });
+
+                res.setHeader('Set-Cookie', cookieString);
+
                 // Send JWT to client (as part of JSON response)
                 respondWithJSON(res, {
                     message: "Login successful and User created successfully",
@@ -130,6 +141,16 @@ class AuthRoutes {
                 );
                 console.log("JWT generated");
 
+                const cookieString = cookie.serialize('authToken', `Bearer ${token}`, {
+                    httpOnly: true,  // Prevents client-side access
+                    secure: true,    // Ensures cookie is sent over HTTPS
+                    maxAge: 60 * 60 * 24, // 1 day in seconds
+                    path: '/',
+                    sameSite: 'None' // Controls cross-site request behavior
+                });
+
+                res.setHeader('Set-Cookie', cookieString);
+
                 // Send JWT to client (as part of JSON response)
                 respondWithJSON(res, {
                     message: "Login successful",
@@ -149,14 +170,16 @@ class AuthRoutes {
     }
     // Route handler to check if user is signed in
     async signedIn(req, res) {
-        const authHeader = req.headers['authorization'];
+        const authHeader = req.headers['cookie'];
+        console.log(authHeader);
 
         if (!authHeader) {
             respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
             return;
         }
 
-        const token = authHeader.split(' ')[1];  // Assuming the header format is 'Bearer <token>'
+        const token = decodeURIComponent(authHeader).split(' ')[1];  // Assuming the header format is 'Bearer <token>'
+        console.log(token);
 
         if (!token) {
             respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
@@ -203,15 +226,17 @@ class AuthRoutes {
     }
     // Route handler for logging out
     async logout(req, res) {
-        const authHeader = req.headers['authorization'];
+        const authHeader = req.headers['cookie'];
+        console.log(authHeader);
 
         if (!authHeader) {
             respondWithJSON(res, { message: "Not authenticated" }, 403);
             return;
         }
 
-        // Extract the token from the Authorization header
-        const token = authHeader.split(' ')[1];  // Assuming 'Bearer <token>'
+        // Extract the token from the Cookie header
+        const token = decodeURIComponent(authHeader).split(' ')[1];  // Assuming the header format is 'Bearer <token>'
+        console.log(token);
 
         if (!token) {
             respondWithJSON(res, { message: "Token missing or invalid" }, 403);
