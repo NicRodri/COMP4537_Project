@@ -44,7 +44,8 @@ class Authentication {
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    console.log("Registration successful:", xhr.responseText);
+                    const response = JSON.parse(xhr.responseText);  // Parse the JSON response
+                    console.log("Registration successful:", response);
                     // Handle successful registration (e.g., redirect or show success message)
                 } else {
                     console.error("Registration failed:", xhr.responseText);
