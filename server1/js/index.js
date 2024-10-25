@@ -39,6 +39,7 @@ class Authentication {
         const xhr = new XMLHttpRequest();
         xhr.open(POST, `${this.apiPath}/register`);
         xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.withCredentials = true; // Allow cookies to be sent and received
 
         // Handle the response from the server
         xhr.onreadystatechange = function () {
