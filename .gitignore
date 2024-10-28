@@ -2,3 +2,5 @@ node_modules/
 .env
 yoloserver/output/
 yoloserver/input/
+face_reaging_server/model/__pycache__
+face_reaging_server/model/best_unet_model.pth
