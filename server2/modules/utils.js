@@ -34,4 +34,5 @@ function setCorsHeaders(req, res, next) {
     next(); // Pass the request to the next middleware or route handler
 }
 
+
 module.exports = { respondWithJSON, parseCookies, setCorsHeaders };

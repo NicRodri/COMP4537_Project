@@ -6,7 +6,7 @@ const { respondWithJSON, parseCookies } = require('./modules/utils');
 const jwt = require('jsonwebtoken');
 const SECRET_KEY = 'your-secret-key';
 const cookie = require('cookie');
-
+const connectML = require('./modules/connectML');
 
 const saltRounds = 12;  // for bcrypt
 const SESSION_EXPIRATION_TIME = 1 * 60 * 60 * 1000; // 1 hour
@@ -277,12 +277,45 @@ class AuthRoutes {
             }
         }
     }
+    // Route handler for reaging the token
+    async reaging(req, res) {
+        const authHeader = req.headers['cookie'];
+        console.log(authHeader);
+
+        if (!authHeader) {
+            respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
+            return;
+        }
+
+        const token = authHeader.split('=')[1];  // extracts the value from authheader
+        // console.log(token);
+
+        if (!token) {
+            respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
+            return;
+        }
+
+        const { valid, decoded, message } = await this.validateToken(token);
+        if (!valid) {
+            respondWithJSON(res, { message }, 403);
+            return;
+        }
+
+        var result = await connectML.connectML();
+        // console.log(result.data);
+
+        respondWithJSON(res, {result: result.data}, 200);
+
+    }
+
+
 
     registerRoutes() {
         this.router.addRoute('/register', this.createUser.bind(this));
         this.router.addRoute('/login', this.login.bind(this));
         this.router.addRoute('/signedin', this.signedIn.bind(this));
         this.router.addRoute('/logout', this.logout.bind(this));
+        this.router.addRoute('/reaging', this.reaging.bind(this));
     }
 
     async validateToken(token) {
@@ -314,7 +347,6 @@ class AuthRoutes {
             }
         }
     }
-    
 }
 
 module.exports = AuthRoutes;
