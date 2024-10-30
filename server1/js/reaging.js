@@ -1,34 +1,62 @@
-const API_PATH = "http://localhost:8080";  // Ensure the correct URL format
-const POST = "POST";
+const API_PATH = "http://localhost:8080";
+const cameraPreview = document.getElementById('cameraPreview');
+const snapshotCanvas = document.getElementById('snapshotCanvas');
+const startCameraButton = document.getElementById('startCameraButton');
+const captureButton = document.getElementById('captureButton');
+const sendButton = document.getElementById('sendButton');
+const jsonDisplay = document.getElementById('jsonDisplay');
+const capturedImage = document.getElementById('capturedImage');
+const resultImage = document.getElementById('resultImage');
+let videoStream;
 
-function fetchData() {
-    const xhr = new XMLHttpRequest();
-    xhr.open(POST, `${API_PATH}/reaging`, true);
-    xhr.withCredentials = true;  // Include cookies in cross-origin requests
+// Start camera preview
+startCameraButton.addEventListener('click', async () => {
+    try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        cameraPreview.srcObject = videoStream;
+        cameraPreview.style.display = 'block';
+        captureButton.style.display = 'inline-block';
+    } catch (error) {
+        console.error("Error accessing camera:", error);
+        alert("Unable to access the camera.");
+    }
+});
 
-    xhr.onreadystatechange = () => {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            // const jsonDisplay = document.getElementById('jsonDisplay');
-            const resultImage = document.getElementById('resultImage');
-            if (xhr.status >= 200 && xhr.status < 300) {
-                // Display raw JSON response
-                const result = JSON.parse(xhr.responseText);
-                // jsonDisplay.textContent = JSON.stringify(result, null, 2); // Pretty print JSON
+// Capture image from video
+captureButton.addEventListener('click', () => {
+    const context = snapshotCanvas.getContext('2d');
+    snapshotCanvas.width = cameraPreview.videoWidth;
+    snapshotCanvas.height = cameraPreview.videoHeight;
+    context.drawImage(cameraPreview, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
 
-                // Extract image URL from response and display it
-                const imageUrl = result.result[0]?.url;
-                if (imageUrl) {
-                    resultImage.src = imageUrl;
-                    resultImage.style.display = 'block'; // Show the image
-                }
+    // Display captured image
+    const capturedDataUrl = snapshotCanvas.toDataURL('image/png');
+    capturedImage.src = capturedDataUrl;
+    capturedImage.style.display = 'block';
+    sendButton.style.display = 'inline-block';
+});
+
+sendButton.addEventListener('click', async () => {
+    snapshotCanvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('image', blob, 'captured-image.png');
+
+        try {
+            const response = await fetch(`${API_PATH}/reaging`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include' // Include cookies if authentication is required
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(result);
             } else {
-                jsonDisplay.textContent = "User is not authenticated.";
-                resultImage.style.display = 'none'; // Hide the image if there's an error
+                console.error("Error:", response.status, response.statusText);
             }
+        } catch (error) {
+            console.error("Error sending image to API:", error);
         }
-    };
+    }, 'image/png');
 
-    xhr.send();
-}
-
-document.getElementById('requestButton').addEventListener('click', fetchData);
+});

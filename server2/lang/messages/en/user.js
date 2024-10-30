@@ -14,6 +14,8 @@ const MESSAGES = {
     INVALID_INPUT: "Invalid input",
     INVALID_FORMAT: "Invalid format",
     NOT_AUTHENTICATED: "userResult len  = 0 aka noth authenticated",
+    UPLOAD_FAILED: "Image upload failed",
+    PROCESSING_ERROR: "Error processing the image"
 };
 
 
