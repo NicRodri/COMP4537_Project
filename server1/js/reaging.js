@@ -1,27 +1,29 @@
 const API_PATH = "http://localhost:8080";  // Ensure the correct URL format
 const POST = "POST";
 
-
-
-// const auth = new Authentication(API_PATH);
-
-function onload() {
+function fetchData() {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `${API_PATH}/reaging`, true);
+    xhr.open(POST, `${API_PATH}/reaging`, true);
     xhr.withCredentials = true;  // Include cookies in cross-origin requests
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
+            // const jsonDisplay = document.getElementById('jsonDisplay');
+            const resultImage = document.getElementById('resultImage');
             if (xhr.status >= 200 && xhr.status < 300) {
-                // User is authenticated
-                result = JSON.parse(xhr.responseText);
-                const imageUrl = result.data[0]?.url;
-                document.getElementById('resultImage').src = imageUrl;
-                // console.log(xhr.responseText);
+                // Display raw JSON response
+                const result = JSON.parse(xhr.responseText);
+                // jsonDisplay.textContent = JSON.stringify(result, null, 2); // Pretty print JSON
+
+                // Extract image URL from response and display it
+                const imageUrl = result.result[0]?.url;
+                if (imageUrl) {
+                    resultImage.src = imageUrl;
+                    resultImage.style.display = 'block'; // Show the image
+                }
             } else {
-                // User is not authenticated
-                console.log("User is not authenticated.");
-                // window.location.href = './index.html'; // Redirect to login page
+                jsonDisplay.textContent = "User is not authenticated.";
+                resultImage.style.display = 'none'; // Hide the image if there's an error
             }
         }
     };
@@ -29,4 +31,4 @@ function onload() {
     xhr.send();
 }
 
-onload();
+document.getElementById('requestButton').addEventListener('click', fetchData);

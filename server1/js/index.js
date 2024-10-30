@@ -104,6 +104,7 @@ function checkAuthentication() {
             if (xhr.status >= 200 && xhr.status < 300) {
                 // User is authenticated
                 console.log("User is authenticated.");
+                window.location.href = './reaging.html'; // Redirect to dashboard
             } else {
                 // User is not authenticated
                 console.log("User is not authenticated.");

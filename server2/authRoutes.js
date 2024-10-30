@@ -279,34 +279,47 @@ class AuthRoutes {
     }
     // Route handler for reaging the token
     async reaging(req, res) {
-        const authHeader = req.headers['cookie'];
-        console.log(authHeader);
-
-        if (!authHeader) {
-            respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
-            return;
+        try {
+            const authHeader = req.headers['cookie'];
+            console.log("Auth Header:", authHeader);
+    
+            // Check if authorization header exists
+            if (!authHeader) {
+                respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
+                return;
+            }
+    
+            // Extract token from cookie
+            const token = authHeader.split('=')[1];  // assumes format "token=value"
+            if (!token) {
+                respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
+                return;
+            }
+    
+            // Validate the token
+            const { valid, decoded, message } = await this.validateToken(token);
+            if (!valid) {
+                respondWithJSON(res, { message }, 403);
+                return;
+            }
+    
+            // Attempt to retrieve data from connectML
+            try {
+                const result = await connectML.connectML();
+                if (!result || !result.data) {
+                    throw new Error("Data from connectML is empty or undefined");
+                }
+                respondWithJSON(res, { result: result.data }, 200);
+            } catch (err) {
+                console.error("Error connecting to ML service:", err.message);
+                respondWithJSON(res, { message: "Error retrieving data from ML service" }, 500);
+            }
+        } catch (error) {
+            console.error("Error in reaging route:", error.message);
+            respondWithJSON(res, { message: "Internal Server Error" }, 500);
         }
-
-        const token = authHeader.split('=')[1];  // extracts the value from authheader
-        // console.log(token);
-
-        if (!token) {
-            respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
-            return;
-        }
-
-        const { valid, decoded, message } = await this.validateToken(token);
-        if (!valid) {
-            respondWithJSON(res, { message }, 403);
-            return;
-        }
-
-        var result = await connectML.connectML();
-        // console.log(result.data);
-
-        respondWithJSON(res, {result: result.data}, 200);
-
     }
+    
 
 
 
