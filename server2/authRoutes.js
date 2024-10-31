@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const { MESSAGES } = require('./lang/messages/en/user');
-const { respondWithJSON } = require('./modules/utils');
+const { respondWithJSON, respondWithImage } = require('./modules/utils');
 const initializeDB = require('./modules/connection');
 const {connectML} = require('./modules/connectML');
 
@@ -220,11 +220,11 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
         console.log(req.file)
 
         const result = await connectML(req.file.buffer);
-        if (!result || !result.data) {
+        if (!result || result.length === 0) {
             throw new Error("Data from connectML is empty or undefined");
         }
-
-        respondWithJSON(res, { result: result.data });
+        console.log(result);
+        respondWithImage(res, result, req.file.mimetype);
     } catch (error) {
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, 500);
