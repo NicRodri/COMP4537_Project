@@ -7,7 +7,7 @@ const multer = require('multer');
 const { MESSAGES } = require('./lang/messages/en/user');
 const { respondWithJSON } = require('./modules/utils');
 const initializeDB = require('./modules/connection');
-const connectML = require('./modules/connectML');
+const {connectML} = require('./modules/connectML');
 
 const SECRET_KEY = 'your-secret-key';
 const saltRounds = 12;
@@ -216,6 +216,8 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
         if (!req.file) {
             return respondWithJSON(res, { message: MESSAGES.UPLOAD_FAILED }, 400);
         }
+
+        console.log(req.file)
 
         const result = await connectML(req.file.buffer);
         if (!result || !result.data) {
