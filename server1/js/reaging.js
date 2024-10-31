@@ -40,7 +40,7 @@ sendButton.addEventListener('click', async () => {
     snapshotCanvas.toBlob(async (blob) => {
         const formData = new FormData();
         formData.append('image', blob, 'captured-image.png');
-        console.log(formData)
+        console.log(formData);
 
         try {
             const response = await fetch(`${API_PATH}/reaging`, {
@@ -50,16 +50,30 @@ sendButton.addEventListener('click', async () => {
             });
 
             if (response.ok) {
-                const result = await response.json();
-                console.log(result);
+                // **Modified code starts here**
+                // Handle the response as a Blob since the server is returning image data
+                const imageBlob = await response.blob();
+
+                // Create a local URL of that image
+                const imageObjectURL = URL.createObjectURL(imageBlob);
+
+                // Display the image in the resultImage element
+                resultImage.src = imageObjectURL;
+                resultImage.style.display = 'block';
+
+                // Optional: Revoke the object URL after the image has loaded
+                resultImage.onload = () => {
+                    URL.revokeObjectURL(imageObjectURL);
+                };
+
+                console.log("Image received and displayed.");
+                // **Modified code ends here**
             } else {
-                console.log(response)
-                console.log("get farmed")
+                console.log(response);
                 console.error("Error:", response.status, response.statusText);
             }
         } catch (error) {
             console.error("Error sending image to API:", error);
         }
     }, 'image/png');
-
 });
