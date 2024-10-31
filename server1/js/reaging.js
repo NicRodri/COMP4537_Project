@@ -40,18 +40,21 @@ sendButton.addEventListener('click', async () => {
     snapshotCanvas.toBlob(async (blob) => {
         const formData = new FormData();
         formData.append('image', blob, 'captured-image.png');
+        console.log(formData)
 
         try {
             const response = await fetch(`${API_PATH}/reaging`, {
                 method: 'POST',
                 body: formData,
-                credentials: 'include' // Include cookies if authentication is required
+                credentials: 'include'
             });
 
             if (response.ok) {
                 const result = await response.json();
                 console.log(result);
             } else {
+                console.log(response)
+                console.log("get farmed")
                 console.error("Error:", response.status, response.statusText);
             }
         } catch (error) {
