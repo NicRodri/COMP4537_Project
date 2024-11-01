@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Request</title>
+</head>
+<body>
+    <button id="startCameraButton">Start Camera</button>
+    <button id="captureButton" style="display: none;">Capture Image</button>
+    <button id="sendButton" style="display: none;">Send to API</button>
+    <video id="cameraPreview" autoplay style="display: none;"></video>
+    <canvas id="snapshotCanvas" style="display: none;"></canvas>
+
+    <div class="image-container">
+        <div>
+            <h3>Captured Image</h3>
+            <img id="capturedImage" alt="Captured Image" style="display: none;">
+        </div>
+        <div>
+            <h3>Generated Image</h3>
+            <img id="resultImage" alt="Generated Image" style="display: none;">
+        </div>
+    </div>
+    <pre id="jsonDisplay"></pre>
+
+
+
+    <script src="./js/reaging.js"></script>
+</body>
+</html>

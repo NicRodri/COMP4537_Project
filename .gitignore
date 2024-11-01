@@ -4,3 +4,5 @@ yoloserver/output/
 yoloserver/input/
 face_reaging_server/model/__pycache__
 face_reaging_server/model/best_unet_model.pth
+package-lock.json
+package.json
