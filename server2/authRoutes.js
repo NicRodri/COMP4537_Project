@@ -54,6 +54,13 @@ const validateToken = async (req, res, next) => {
         return respondWithJSON(res, { message: "Invalid token" }, 403);
     }
 };
+const validateAdmin = (req, res, next) => {
+    if (req.user.userType === "admin") {
+        next();  // If the user is an admin, proceed to the route
+    } else {
+        respondWithJSON(res, { message: "Unauthorized access" }, 403); // Deny access
+    }
+};
 
 // Register new user
 router.post('/register', async (req, res) => {
@@ -229,6 +236,11 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, 500);
     }
+});
+
+router.get('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
+    // Your code to handle admin-specific tasks
+    respondWithJSON(res, { message: "Welcome to the admin dashboard" });
 });
 
 module.exports = router;
