@@ -1,5 +1,8 @@
 const fetch = require("node-fetch");
 const FormData = require("form-data");
+require('dotenv').config();
+
+const API_URL = process.env.ML_URL_PRODUCTION
 
 async function connectML(imageBuffer) {
     // Prepare the form data
@@ -10,7 +13,7 @@ async function connectML(imageBuffer) {
 
     try {
         // Send the form data
-        const response = await fetch("https://homura.makeup/process_image/", {
+        const response = await fetch(API_URL, {
             method: "POST",
             body: formData,
             headers: formData.getHeaders(), // Set headers for multipart form-data
