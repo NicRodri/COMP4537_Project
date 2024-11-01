@@ -1,5 +1,6 @@
-require('dotenv').config();
-const API_PATH = process.env.BACKEND_URL;  // Ensure the correct URL format
+// require('dotenv').config();
+const API_PATH = "https://homura.ca/COMP4537/project";  // Ensure the correct URL format
+console.log(API_PATH)
 const POST = "POST";
 
 class Authentication {
