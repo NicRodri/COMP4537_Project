@@ -77,3 +77,21 @@ sendButton.addEventListener('click', async () => {
         }
     }, 'image/png');
 });
+async function logout() {
+    try {
+        const response = await fetch('http://localhost:8080/logout', {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+        });
+
+        if (response.ok) {
+            alert("You have been logged out successfully.");
+            window.location.href = './index.html'; // Redirect to login or homepage
+        } else {
+            alert("Failed to log out. Please try again.");
+        }
+    } catch (error) {
+        console.error("Logout error:", error);
+        alert("An error occurred. Please try again.");
+    }
+}

@@ -5,7 +5,7 @@ async function initializeDB() {
     try {
         // Create a connection using async/await
         const connection = await mysql.createConnection(dbConfig);
-        console.log("Connected to the 'isa_project' database.");
+        // console.log("Connected to the 'isa_project' database.");
 
         // Create token_blacklist table
         const createTokenBlacklistTableQuery = `
@@ -17,7 +17,7 @@ async function initializeDB() {
         `;
 
         await connection.query(createTokenBlacklistTableQuery);
-        console.log('Token blacklist table created or already exists');
+        // console.log('Token blacklist table created or already exists');
 
         // Create users table
         const createUserTableQuery = `
@@ -31,7 +31,7 @@ async function initializeDB() {
         `;
 
         await connection.query(createUserTableQuery);
-        console.log('Users table created or already exists');
+        // console.log('Users table created or already exists');
 
         // Return the connection to use it in other parts of the app
         return connection;

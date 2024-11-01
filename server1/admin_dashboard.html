@@ -4,42 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
-        }
-        .dashboard-container {
-            text-align: center;
-            padding: 2em;
-            border-radius: 8px;
-            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-            background-color: #ffffff;
-            width: 80%;
-            max-width: 600px;
-        }
-        h1 {
-            color: #333;
-            font-size: 2em;
-            margin-bottom: 0.5em;
-        }
-        p {
-            color: #666;
-            font-size: 1.2em;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/admin.css"> <!-- Link to external CSS -->
 </head>
 <body>
-    <div class="dashboard-container">
+    <script src="./js/admin.js"></script>
+    <div id="admin-dashboard-content" class="admin-dashboard-container" style="display: none;">
         <h1>Welcome, Admin!</h1>
         <p>You are now logged into the admin dashboard.</p>
+        <button class="logout-button" onclick="logout()">Log Out</button>
     </div>
 
     <script src="./js/admin.js"></script>
+    
 </body>
 </html>
