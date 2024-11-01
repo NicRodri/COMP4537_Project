@@ -1,4 +1,5 @@
-const API_PATH = "http://localhost:8080";  // Ensure the correct URL format
+require('dotenv').config();
+const API_PATH = process.env.BACKEND_URL_DEV;  // Ensure the correct URL format
 const POST = "POST";
 
 class Authentication {
