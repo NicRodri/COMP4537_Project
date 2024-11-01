@@ -79,7 +79,7 @@ sendButton.addEventListener('click', async () => {
 });
 async function logout() {
     try {
-        const response = await fetch('http://localhost:8080/logout', {
+        const response = await fetch(`${API_PATH}/logout`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
         });
