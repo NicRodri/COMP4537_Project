@@ -10,7 +10,7 @@ async function connectML(imageBuffer) {
 
     try {
         // Send the form data
-        const response = await fetch("http://127.0.0.1:8000/process_image/", {
+        const response = await fetch("https://homura.makeup/process_image/", {
             method: "POST",
             body: formData,
             headers: formData.getHeaders(), // Set headers for multipart form-data
