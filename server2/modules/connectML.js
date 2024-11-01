@@ -3,12 +3,10 @@ const FormData = require("form-data");
 require('dotenv').config();
 
 const API_URL = process.env.ML_URL
-console.log(API_URL);
 
-console.log("hfsdfadsfs XD");
 async function connectML(imageBuffer) {
+    console.log("API_URL:");
     console.log(API_URL);
-    console.log("test XD");
     // Prepare the form data
     const formData = new FormData();
     formData.append("image", imageBuffer, { filename: "input_image.jpg", contentType: "image/jpeg" });
