@@ -230,7 +230,8 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
         if (!result || result.length === 0) {
             throw new Error("Data from connectML is empty or undefined");
         }
-        console.log(result);
+        console.log("result reaging: ");
+	console.log(result);    
         respondWithImage(res, result, req.file.mimetype);
     } catch (error) {
         console.error("Error in reaging route:", error.message);
