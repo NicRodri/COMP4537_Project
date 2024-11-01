@@ -2,7 +2,7 @@ const fetch = require("node-fetch");
 const FormData = require("form-data");
 require('dotenv').config();
 
-const API_URL = process.env.ML_URL_PRODUCTION
+const API_URL = process.env.ML_URL
 
 async function connectML(imageBuffer) {
     // Prepare the form data

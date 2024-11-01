@@ -1,5 +1,5 @@
 require('dotenv').config();
-const API_PATH = process.env.BACKEND_URL_DEV;  // Ensure the correct URL format
+const API_PATH = process.env.BACKEND_URL;  // Ensure the correct URL format
 const POST = "POST";
 
 class Authentication {
