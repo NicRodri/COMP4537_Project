@@ -55,7 +55,7 @@ const validateToken = async (req, res, next) => {
         }
         return respondWithJSON(res, { message: "Invalid token" }, 403);
     } finally {
-        if (connection) connection.release(); // Release the connection back to the pool
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 };
 const validateAdmin = (req, res, next) => {
@@ -127,7 +127,7 @@ router.post('/register', async (req, res) => {
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
     } finally {
-        if (connection) connection.release(); // Release the connection back to the pool
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -180,7 +180,7 @@ router.post('/login', async (req, res) => {
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
     } finally {
-        if (connection) connection.release(); // Release the connection back to the pool
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -204,6 +204,8 @@ router.post('/signedin', validateToken, async (req, res) => {
         });
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -226,7 +228,7 @@ router.get('/logout', validateToken, async (req, res) => {
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
     } finally {
-        if (connection) connection.release(); // Release the connection back to the pool
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
