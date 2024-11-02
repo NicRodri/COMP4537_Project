@@ -1,7 +1,8 @@
+const API_PATH = "https://homura.ca/COMP4537/project";
 async function checkAdminRole() {
     try {
         console.log("Checking admin role...");
-        const response = await fetch('http://localhost:8080/signedin', {
+        const response = await fetch(`${API_PATH}/signedin`, {
             method: 'POST',
             credentials: 'include', // Include cookies in the request
             headers: {
@@ -13,6 +14,7 @@ async function checkAdminRole() {
             const data = await response.json();
             console.log("Received data:", data);
 
+            // This logic will be changed to server side later on.
             // Check if the user has an admin role
             if (data.user_type === "admin") {
                 console.log("User is admin, showing dashboard...");
@@ -40,7 +42,7 @@ window.onload = checkAdminRole;
 
 async function logout() {
     try {
-        const response = await fetch('http://localhost:8080/logout', {
+        const response = await fetch(`${API_PATH}/logout`, {
             method: 'GET',
             credentials: 'include', // Include cookies in the request
         });

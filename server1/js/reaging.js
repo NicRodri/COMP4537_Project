@@ -9,6 +9,31 @@ const capturedImage = document.getElementById('capturedImage');
 const resultImage = document.getElementById('resultImage');
 let videoStream;
 
+// Function to check if the user is authenticated
+function checkAuthentication() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_PATH}/signedin`, true);
+    xhr.withCredentials = true;  // Include cookies in cross-origin requests
+
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // User is authenticated
+                console.log("User is authenticated.");
+                window.location.href = './reaging.html'; // Redirect to dashboard
+            } else {
+                // User is not authenticated
+                console.log("User is not authenticated.");
+                // window.location.href = './index.html'; // Redirect to login page
+            }
+        }
+    };
+
+    xhr.send();
+}
+
+checkAuthentication();
+
 // Start camera preview
 startCameraButton.addEventListener('click', async () => {
     try {
