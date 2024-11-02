@@ -8,6 +8,7 @@ const poolConfig = {
     database: process.env.DB_NAME || 'isa_project',
     waitForConnections: true,
     connectionLimit: 10, // Adjust the limit as per your needs
+    idleTimeout: 10,           
     queueLimit: 0
 };
 
