@@ -7,9 +7,11 @@ const poolConfig = {
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'isa_project',
     waitForConnections: true,
-    connectionLimit: 10, // Adjust the limit as per your needs
-    idleTimeout: 10,           
-    queueLimit: 0
+    connectionLimit: 10,
+    idleTimeout: 60000, // Set to 1 minute for clearer results
+    queueLimit: 0,
+    enableKeepAlive: true, // Ensures connections are reused
+    keepAliveInitialDelay: 0, // Immediately sends keepalive packets
 };
 
 // Use the host if defined, otherwise use the socketPath if available
