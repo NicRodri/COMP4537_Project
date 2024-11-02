@@ -1,4 +1,4 @@
-const API_PATH = "https://homura.ca/COMP4537/project";
+const API_PATH = "http://localhost:8080";
 const cameraPreview = document.getElementById('cameraPreview');
 const snapshotCanvas = document.getElementById('snapshotCanvas');
 const startCameraButton = document.getElementById('startCameraButton');
