@@ -61,35 +61,41 @@ class Authentication {
     }
 
     async login() {
-        // Collect data from the login form
         const email = document.getElementById("loginEmail").value;
         const password = document.getElementById("loginPassword").value;
-
+    
         const data = {
             email: email,
             password: password
         };
-
+    
         const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${this.apiPath}/login`);  // Use the correct HTTP method string
+        xhr.open("POST", `${this.apiPath}/login`);
         xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.withCredentials = true; // Allow cookies to be sent and received
-
-        // Handle the response from the server
+        xhr.withCredentials = true;
+    
         xhr.onreadystatechange = () => {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    const response = JSON.parse(xhr.responseText);  // Parse the JSON response
+                    const response = JSON.parse(xhr.responseText);
                     console.log("Login successful:", response);
+    
+                    // Redirect based on user role
+                    if (response.user.userType === "admin") {
+                        window.location.href = './admin_dashboard.html';
+                    } else {
+                        window.location.href = './reaging.html';
+                    }
                 } else {
                     console.error("Login failed:", xhr.responseText);
+                    this.displayErrorMessage("Login failed. Please check your credentials.");
                 }
             }
         };
-
-        // Send the data as a JSON string
+    
         xhr.send(JSON.stringify(data));
     }
+    
 }
 
 // Usage
