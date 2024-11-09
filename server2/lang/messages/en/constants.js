@@ -10,7 +10,13 @@ const CONSTANTS = {
         FORBIDDEN: 403,
         CONFLICT: 409,
         INTERNAL_SERVER_ERROR: 500
-    }
+    },
+    DB_PORT: 3306,
+    CONNECTION_LIMIT: 10,
+    IDLE_TIMEOUT: 60000, // 1 minute in milliseconds
+    QUEUE_LIMIT: 0,
+    ENABLE_KEEP_ALIVE: true,
+    KEEP_ALIVE_INITIAL_DELAY: 0,
 };
 
 module.exports = { CONSTANTS };

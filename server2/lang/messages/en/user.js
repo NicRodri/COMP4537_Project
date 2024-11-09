@@ -25,7 +25,21 @@ const MESSAGES = {
     TOKEN_EXPIRED: "Token expired",
     INVALID_TOKEN: "Invalid token",
     LOGOUT_SUCCESS: "Logout successful",
-    INTERNAL_SERVER_ERROR: "Internal server error"
+    INTERNAL_SERVER_ERROR: "Internal server error",
+    DEFAULT_IMAGE_TYPE: 'image/png',
+    ALLOW_CREDENTIALS: "true",
+    ALLOW_METHODS: "POST, GET, OPTIONS, DELETE",
+    ALLOW_HEADERS: "Content-Type, Authorization",
+    OPTIONS_METHOD: "OPTIONS",
+    SOCKET_PATH: '/run/mysqld/mysqld.sock',
+    DEFAULT_IMAGE_TYPE: 'image/png',
+    ALLOW_CREDENTIALS: "true",
+    ALLOW_METHODS: "POST, GET, OPTIONS, DELETE",
+    ALLOW_HEADERS: "Content-Type, Authorization",
+    OPTIONS_METHOD: "OPTIONS",
+    LOGIN_SUCCESS: "Login successful",
+    REGISTER_SUCCESS: "User created successfully",
+    INVALID_CREDENTIALS: "Invalid credentials",
 };
 
 module.exports = { MESSAGES };
