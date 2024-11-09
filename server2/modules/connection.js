@@ -5,7 +5,7 @@ async function initializeDB() {
     try {
         // Get a connection from the pool
         const connection = await pool.getConnection();
-        console.log("Connected to the 'isa_project' database.");
+        // console.log("Connected to the 'isa_project' database.");
 
         // Create token_blacklist table
         const createTokenBlacklistTableQuery = `
@@ -17,7 +17,7 @@ async function initializeDB() {
         `;
 
         await connection.query(createTokenBlacklistTableQuery);
-        console.log('Token blacklist table created or already exists');
+        // console.log('Token blacklist table created or already exists');
 
         // Create users table
         const createUserTableQuery = `
@@ -31,7 +31,7 @@ async function initializeDB() {
         `;
 
         await connection.query(createUserTableQuery);
-        console.log('Users table created or already exists');
+        // console.log('Users table created or already exists');
 
         // Release the connection back to the pool
         connection.release();

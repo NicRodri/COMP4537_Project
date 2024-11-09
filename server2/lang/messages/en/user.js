@@ -13,10 +13,19 @@ const MESSAGES = {
     SUCCESS_QUERY: "Query executed successfully",
     INVALID_INPUT: "Invalid input",
     INVALID_FORMAT: "Invalid format",
-    NOT_AUTHENTICATED: "userResult len  = 0 aka noth authenticated",
+    NOT_AUTHENTICATED: "User not authenticated",
     UPLOAD_FAILED: "Image upload failed",
-    PROCESSING_ERROR: "Error processing the image"
+    PROCESSING_ERROR: "Error processing the image",
+    ALL_FIELDS_REQUIRED: "All fields are required",
+    EMAIL_USERNAME_EXISTS: "Email or username already exists",
+    LOGIN_SUCCESS: "Login successful",
+    REGISTER_SUCCESS: "User created successfully",
+    INVALID_CREDENTIALS: "Invalid credentials",
+    TOKEN_BLACKLISTED: "Token is blacklisted",
+    TOKEN_EXPIRED: "Token expired",
+    INVALID_TOKEN: "Invalid token",
+    LOGOUT_SUCCESS: "Logout successful",
+    INTERNAL_SERVER_ERROR: "Internal server error"
 };
 
-
-module.exports = { MESSAGES }; 
+module.exports = { MESSAGES };

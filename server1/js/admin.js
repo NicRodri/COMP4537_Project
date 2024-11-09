@@ -1,4 +1,4 @@
-const API_PATH = "https://homura.ca/COMP4537/project";
+const API_PATH = "http://localhost:8080";
 async function checkAdminRole() {
     try {
         console.log("Checking admin role...");
