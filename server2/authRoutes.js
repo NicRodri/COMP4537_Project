@@ -8,6 +8,7 @@ const { MESSAGES } = require('./lang/messages/en/user');
 const { respondWithJSON, respondWithImage } = require('./modules/utils');
 const initializeDB = require('./modules/connection');
 const {connectML} = require('./modules/connectML');
+const pool = require('./modules/dbConfig');
 
 const SECRET_KEY = 'your-secret-key';
 const saltRounds = 12;
@@ -27,14 +28,15 @@ const upload = multer({
 // Middleware to validate JWT token
 const validateToken = async (req, res, next) => {
     const token = req.cookies.authToken;
+    let connection;
     
     if (!token) {
         return respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, 403);
     }
 
     try {
-        // Check if token is blacklisted
-        const connection = await initializeDB();
+        // Get a connection from the pool
+        connection = await pool.getConnection();
         const [blacklistedToken] = await connection.query(
             'SELECT * FROM token_blacklist WHERE token = ?',
             [token]
@@ -52,11 +54,21 @@ const validateToken = async (req, res, next) => {
             return respondWithJSON(res, { message: "Token expired" }, 403);
         }
         return respondWithJSON(res, { message: "Invalid token" }, 403);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
+    }
+};
+const validateAdmin = (req, res, next) => {
+    if (req.user.userType === "admin") {
+        next();  // If the user is an admin, proceed to the route
+    } else {
+        respondWithJSON(res, { message: "Unauthorized access" }, 403); // Deny access
     }
 };
 
 // Register new user
 router.post('/register', async (req, res) => {
+    let connection;
     try {
         const { username, email, password } = req.body;
 
@@ -64,7 +76,7 @@ router.post('/register', async (req, res) => {
             return respondWithJSON(res, { message: "All fields are required" }, 400);
         }
 
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
 
         // Check existing user
         const [existingUsers] = await connection.query(
@@ -114,14 +126,17 @@ router.post('/register', async (req, res) => {
         }, 201);
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
 // Login
 router.post('/login', async (req, res) => {
+    let connection;
     try {
         const { email, password } = req.body;
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
         
         const [users] = await connection.query(
             'SELECT * FROM users WHERE email = ?',
@@ -164,13 +179,16 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
 // Check if signed in
 router.post('/signedin', validateToken, async (req, res) => {
+    let connection;
     try {
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
         const [userResult] = await connection.query(
             'SELECT user_type FROM users WHERE id = ?',
             [req.user.userId]
@@ -186,6 +204,8 @@ router.post('/signedin', validateToken, async (req, res) => {
         });
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -193,7 +213,7 @@ router.post('/signedin', validateToken, async (req, res) => {
 router.get('/logout', validateToken, async (req, res) => {
     try {
         const token = req.cookies.authToken;
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
         
         const decoded = jwt.decode(token);
         const expiryDate = new Date(decoded.exp * 1000);
@@ -207,6 +227,8 @@ router.get('/logout', validateToken, async (req, res) => {
         respondWithJSON(res, { message: "Logout successful" });
     } catch (error) {
         respondWithJSON(res, { message: "Internal server error" }, 500);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -223,12 +245,19 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
         if (!result || result.length === 0) {
             throw new Error("Data from connectML is empty or undefined");
         }
-        console.log(result);
+        console.log("result reaging: ");
+	console.log(result);    
         respondWithImage(res, result, req.file.mimetype);
     } catch (error) {
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, 500);
     }
+});
+
+router.get('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
+    let connection;
+    // Your code to handle admin-specific tasks
+    respondWithJSON(res, { message: "Welcome to the admin dashboard" });
 });
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const API_PATH = "http://localhost:8080";
+const API_PATH = "https://homura.ca/COMP4537/project";
 const cameraPreview = document.getElementById('cameraPreview');
 const snapshotCanvas = document.getElementById('snapshotCanvas');
 const startCameraButton = document.getElementById('startCameraButton');
@@ -8,6 +8,31 @@ const jsonDisplay = document.getElementById('jsonDisplay');
 const capturedImage = document.getElementById('capturedImage');
 const resultImage = document.getElementById('resultImage');
 let videoStream;
+
+// Function to check if the user is authenticated
+function checkAuthentication() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_PATH}/signedin`, true);
+    xhr.withCredentials = true;  // Include cookies in cross-origin requests
+
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                // User is authenticated
+                console.log("User is authenticated.");
+                // window.location.href = './reaging.html'; // Redirect to dashboard
+            } else {
+                // User is not authenticated
+                console.log("User is not authenticated.");
+                window.location.href = './index.html'; // Redirect to login page
+            }
+        }
+    };
+
+    xhr.send();
+}
+
+checkAuthentication();
 
 // Start camera preview
 startCameraButton.addEventListener('click', async () => {
@@ -77,3 +102,21 @@ sendButton.addEventListener('click', async () => {
         }
     }, 'image/png');
 });
+async function logout() {
+    try {
+        const response = await fetch(`${API_PATH}/logout`, {
+            method: 'GET',
+            credentials: 'include', // Include cookies in the request
+        });
+
+        if (response.ok) {
+            alert("You have been logged out successfully.");
+            window.location.href = './index.html'; // Redirect to login or homepage
+        } else {
+            alert("Failed to log out. Please try again.");
+        }
+    } catch (error) {
+        console.error("Logout error:", error);
+        alert("An error occurred. Please try again.");
+    }
+}

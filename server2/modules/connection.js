@@ -1,10 +1,10 @@
-const mysql = require('mysql2/promise');
-const dbConfig = require('./dbConfig');
+// initializeDB.js
+const pool = require('./dbConfig');
 
 async function initializeDB() {
     try {
-        // Create a connection using async/await
-        const connection = await mysql.createConnection(dbConfig);
+        // Get a connection from the pool
+        const connection = await pool.getConnection();
         console.log("Connected to the 'isa_project' database.");
 
         // Create token_blacklist table
@@ -33,8 +33,11 @@ async function initializeDB() {
         await connection.query(createUserTableQuery);
         console.log('Users table created or already exists');
 
-        // Return the connection to use it in other parts of the app
-        return connection;
+        // Release the connection back to the pool
+        connection.release();
+
+        // Return the pool to use it in other parts of the app
+        return pool;
     } catch (err) {
         console.error("Error connecting to the database or creating tables:", err);
         throw err;
@@ -42,4 +45,3 @@ async function initializeDB() {
 }
 
 module.exports = initializeDB;
-
