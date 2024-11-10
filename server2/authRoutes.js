@@ -10,6 +10,7 @@ const { respondWithJSON, respondWithImage } = require('./modules/utils');
 const initializeDB = require('./modules/connection');
 const {connectML} = require('./modules/connectML');
 const pool = require('./modules/dbConfig');
+const {incrementEndpointUsage} = require('./modules/endpoint_increment');
 
 const SECRET_KEY = 'your-secret-key';
 
@@ -52,6 +53,14 @@ const validateToken = async (req, res, next) => {
             return respondWithJSON(res, { message: MESSAGES.TOKEN_EXPIRED }, CONSTANTS.STATUS.FORBIDDEN);
         }
         return respondWithJSON(res, { message: MESSAGES.INVALID_TOKEN }, CONSTANTS.STATUS.FORBIDDEN);
+    }
+};
+
+const validateAdmin = (req, res, next) => {
+    if (req.user.role === "admin") {
+        next();  // If the user is an admin, proceed to the route
+    } else {
+        res.redirect('/index.html'); // Redirect to index.html if not authorized
     }
 };
 
@@ -103,6 +112,8 @@ router.post('/register', async (req, res) => {
             sameSite: 'None'
         });
 
+        incrementEndpointUsage('/register', 'POST');
+
         respondWithJSON(res, {
             message: `${MESSAGES.LOGIN_SUCCESS} and ${MESSAGES.REGISTER_SUCCESS}`,
             token,
@@ -120,15 +131,16 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
     try {
+        // console.log("Login route hit");
         const { email, password } = req.body;
         const connection = await initializeDB();
-        
         const [users] = await connection.query(
             'SELECT * FROM users WHERE email = ?',
             [email]
         );
 
         if (users.length === 0) {
+            // console.log("No user found");
             return respondWithJSON(res, { message: MESSAGES.INVALID_CREDENTIALS }, CONSTANTS.STATUS.UNAUTHORIZED);
         }
 
@@ -136,6 +148,7 @@ router.post('/login', async (req, res) => {
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
+            // console.log("Invalid password");
             return respondWithJSON(res, { message: MESSAGES.INVALID_CREDENTIALS }, CONSTANTS.STATUS.UNAUTHORIZED);
         }
 
@@ -152,6 +165,9 @@ router.post('/login', async (req, res) => {
             path: '/',
             sameSite: 'None'
         });
+        // console.log("Login successful");
+        incrementEndpointUsage('/login', 'POST');
+        // console.log("Incremented usage for /login POST");
 
         respondWithJSON(res, {
             message: MESSAGES.LOGIN_SUCCESS,
@@ -179,11 +195,14 @@ router.post('/signedin', validateToken, async (req, res) => {
         if (userResult.length === 0) {
             return respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, CONSTANTS.STATUS.FORBIDDEN);
         }
+        incrementEndpointUsage('/signedin', 'POST');
+
 
         respondWithJSON(res, {
             message: MESSAGES.SUCCESS_QUERY,
             user_type: userResult[0].user_type
         });
+
     } catch (error) {
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     }
@@ -203,11 +222,14 @@ router.get('/logout', validateToken, async (req, res) => {
             [token, expiryDate]
         );
 
+        incrementEndpointUsage('/logout', 'GET');
+
         res.clearCookie('authToken');
         respondWithJSON(res, { message: MESSAGES.LOGOUT_SUCCESS });
     } catch (error) {
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     }
+
 });
 
 // Reaging endpoint
@@ -224,10 +246,35 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
             throw new Error(MESSAGES.PROCESSING_ERROR);
         }
 
+
         respondWithImage(res, result, req.file.mimetype);
     } catch (error) {
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    }
+    incrementEndpointUsage('/reaging', 'POST');
+});
+
+router.post('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
+    respondWithJSON(res, { message: "Welcome to the admin dashboard" });
+});
+
+// Separate route to get usage data
+router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const query = `
+            SELECT endpoint, method, served_count
+            FROM endpoint_usage
+            ORDER BY endpoint, method;
+        `;
+        const [rows] = await connection.query(query);
+        connection.release();
+
+        res.json(rows);  // Respond with usage data as an array
+    } catch (err) {
+        console.error("Error retrieving usage data:", err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
