@@ -37,19 +37,19 @@ async function initializeDB() {
         const createUserApiCallsTableQuery = `
             CREATE TABLE IF NOT EXISTS user_api_calls (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                user_id INT NOT NULL,
+                user_id INT NOT NULL UNIQUE,
                 api_call_count INT DEFAULT 0,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             );
         `;
         await connection.query(createUserApiCallsTableQuery);
 
-        const syncApiCallsTableQuery = `
-        INSERT INTO user_api_calls (user_id, api_call_count)
-        SELECT id, 0 FROM users
-        WHERE id NOT IN (SELECT user_id FROM user_api_calls);
-        `;
-        await connection.query(syncApiCallsTableQuery);
+        // const syncApiCallsTableQuery = `
+        // INSERT INTO user_api_calls (user_id, api_call_count)
+        // SELECT id, 0 FROM users
+        // WHERE id NOT IN (SELECT user_id FROM user_api_calls);
+        // `;
+        // await connection.query(syncApiCallsTableQuery);
 
         const createEndpointUsageTableQuery = `
             CREATE TABLE IF NOT EXISTS endpoint_usage (

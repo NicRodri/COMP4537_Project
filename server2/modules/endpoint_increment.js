@@ -2,9 +2,9 @@
 const pool = require('./dbConfig');
 
 async function incrementEndpointUsage(endpoint, method) {
-    console.log("Incrementing usage for", endpoint, method);
+    // console.log("Incrementing usage for", endpoint, method);
     try {
-        console.log("Incrementing usage for", endpoint, method);
+        // console.log("Incrementing usage for", endpoint, method);
         const connection = await pool.getConnection();
 
         // Insert a new row if the endpoint-method pair does not exist, otherwise increment the served_count

@@ -11,6 +11,8 @@ const initializeDB = require('./modules/connection');
 const {connectML} = require('./modules/connectML');
 const pool = require('./modules/dbConfig');
 const {incrementEndpointUsage} = require('./modules/endpoint_increment');
+const {incrementUserApiCalls} = require('./modules/incrementUserApiCalls');
+
 
 const SECRET_KEY = 'your-secret-key';
 
@@ -186,6 +188,7 @@ router.post('/login', async (req, res) => {
 // Check if signed in
 router.post('/signedin', validateToken, async (req, res) => {
     try {
+        // console.log(req.user);
         const connection = await initializeDB();
         const [userResult] = await connection.query(
             'SELECT user_type FROM users WHERE id = ?',
@@ -235,6 +238,7 @@ router.get('/logout', validateToken, async (req, res) => {
 // Reaging endpoint
 router.post('/reaging', validateToken, upload.single('image'), async (req, res) => {
     try {
+        await incrementUserApiCalls(req.user.userId);
         if (!req.file) {
             return respondWithJSON(res, { message: MESSAGES.UPLOAD_FAILED }, CONSTANTS.STATUS.BAD_REQUEST);
         }
@@ -274,6 +278,30 @@ router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => 
         res.json(rows);  // Respond with usage data as an array
     } catch (err) {
         console.error("Error retrieving usage data:", err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        // Query to get user information along with API call counts
+        const query = `
+            SELECT u.username, u.email, COALESCE(ua.api_call_count, 0) AS api_call_count
+            FROM users u
+            LEFT JOIN user_api_calls ua ON u.id = ua.user_id
+            ORDER BY u.username;
+        `;
+
+        incrementEndpointUsage('/get_user_api_calls', 'GET');
+
+        const [rows] = await connection.query(query);
+        connection.release();
+
+        res.json(rows);  // Respond with user data including API call counts
+    } catch (err) {
+        console.error("Error retrieving user API call counts:", err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

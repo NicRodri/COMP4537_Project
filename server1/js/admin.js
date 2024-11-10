@@ -102,5 +102,55 @@ async function logout() {
     }
 }
 
-// Call checkAdminRole on page load
-window.onload = checkAdminRole;
+// admin.js
+
+async function fetchUserApiCalls() {
+    try {
+        const response = await fetch(`${API_PATH}/get_user_api_calls`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            const userData = await response.json();
+            console.log("User data:", userData);
+            displayUserApiCalls(userData);
+        } else {
+            console.error("Failed to fetch user data:", response.status, response.statusText);
+            alert("Failed to load user data.");
+        }
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        alert("An error occurred while fetching user data.");
+    }
+}
+
+function displayUserApiCalls(data) {
+    const tableBody = document.getElementById('user-api-table-body');
+    tableBody.innerHTML = ''; // Clear existing data
+
+    data.forEach((user) => {
+        const row = document.createElement('tr');
+
+        const usernameCell = document.createElement('td');
+        usernameCell.textContent = user.username;
+        row.appendChild(usernameCell);
+
+        const emailCell = document.createElement('td');
+        emailCell.textContent = user.email;
+        row.appendChild(emailCell);
+
+        const apiCallsCell = document.createElement('td');
+        apiCallsCell.textContent = user.api_call_count;
+        row.appendChild(apiCallsCell);
+
+        tableBody.appendChild(row);
+    });
+}
+
+// Fetch user API call data when the admin dashboard loads
+window.onload = async () => {
+    await checkAdminRole();  // Check admin role and fetch usage data
+    await fetchUserApiCalls();  // Fetch and display user API calls
+};
+
