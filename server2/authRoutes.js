@@ -216,8 +216,10 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
         if (!req.file) {
             return respondWithJSON(res, { message: MESSAGES.UPLOAD_FAILED }, CONSTANTS.STATUS.BAD_REQUEST);
         }
+        const authToken = req.cookies.authToken; // Get the token from cookies
+        
+        const result = await connectML(req.file.buffer, authToken); // Pass token to connectML
 
-        const result = await connectML(req.file.buffer);
         if (!result || result.length === 0) {
             throw new Error(MESSAGES.PROCESSING_ERROR);
         }
