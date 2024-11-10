@@ -37,9 +37,10 @@ async function initializeDB() {
         const createUserApiCallsTableQuery = `
             CREATE TABLE IF NOT EXISTS user_api_calls (
                 id INT PRIMARY KEY AUTO_INCREMENT,
-                user_id INT NOT NULL UNIQUE,
+                user_id INT NOT NULL,
                 api_call_count INT DEFAULT 0,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE(user_id)  
             );
         `;
         await connection.query(createUserApiCallsTableQuery);

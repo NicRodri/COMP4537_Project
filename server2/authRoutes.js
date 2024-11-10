@@ -250,13 +250,13 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
             throw new Error(MESSAGES.PROCESSING_ERROR);
         }
 
-
+        incrementEndpointUsage('/reaging', 'POST');
         respondWithImage(res, result, req.file.mimetype);
     } catch (error) {
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     }
-    incrementEndpointUsage('/reaging', 'POST');
+    
 });
 
 router.post('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
@@ -276,6 +276,7 @@ router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => 
         connection.release();
 
         res.json(rows);  // Respond with usage data as an array
+        incrementEndpointUsage('/get_usage_data', 'GET');
     } catch (err) {
         console.error("Error retrieving usage data:", err);
         res.status(500).json({ error: 'Internal server error' });
