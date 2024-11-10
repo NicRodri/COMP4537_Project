@@ -30,8 +30,9 @@ unet_model = UNet().to(device)
 unet_model.load_state_dict(torch.load("model/best_unet_model.pth", map_location=device))
 unet_model.eval()
 
-def verify_token(auth_token: str = Header(...)):
+def verify_token(auth_token):
     print("Received auth_token:", auth_token)
+    db_connection = None  # Initialize db_connection to None
     try:
         # Decode token
         decoded_token = jwt.decode(auth_token, SECRET_KEY, algorithms=["HS256"])
@@ -60,9 +61,10 @@ def verify_token(auth_token: str = Header(...)):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=403, detail="Invalid token")
     finally:
-        if db_connection.is_connected():
+        if db_connection and db_connection.is_connected():
             cursor.close()
             db_connection.close()
+
 
 
 @app.post("/process_image/")
@@ -72,6 +74,7 @@ async def process_image_api(
     target_age: int = Form(...),
     auth_token: str = Header(...)
 ):
+    auth_token = verify_token(auth_token)
 
     image_data = await image.read()
     pil_image = Image.open(io.BytesIO(image_data)).convert("RGB")
