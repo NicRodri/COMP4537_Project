@@ -17,7 +17,8 @@ const setCorsMiddleware = (req, res, next) => {
     res.header("Access-Control-Allow-Origin", CLIENT_URL);
     res.header("Access-Control-Allow-Credentials", MESSAGES.ALLOW_CREDENTIALS);
     res.header("Access-Control-Allow-Methods", MESSAGES.ALLOW_METHODS);
-    res.header("Access-Control-Allow-Headers", MESSAGES.ALLOW_HEADERS);
+    res.header("Access-Control-Allow-Headers", `${MESSAGES.ALLOW_HEADERS}, X-Alert`); // Allow custom headers
+    res.header("Access-Control-Expose-Headers", "X-Alert"); // Expose custom headers to the client
 
     if (req.method === MESSAGES.OPTIONS_METHOD) {
         return res.status(CONSTANTS.STATUS.SUCCESS).end();

@@ -238,26 +238,34 @@ router.get('/logout', validateToken, async (req, res) => {
 // Reaging endpoint
 router.post('/reaging', validateToken, upload.single('image'), async (req, res) => {
     try {
-        await incrementUserApiCalls(req.user.userId);
+        const shouldAlertUser = await incrementUserApiCalls(req.user.userId);
+
         if (!req.file) {
             return respondWithJSON(res, { message: MESSAGES.UPLOAD_FAILED }, CONSTANTS.STATUS.BAD_REQUEST);
         }
-        const authToken = req.cookies.authToken; // Get the token from cookies
-        
-        const result = await connectML(req.file.buffer, authToken); // Pass token to connectML
+
+        const authToken = req.cookies.authToken;
+        const result = await connectML(req.file.buffer, authToken);
 
         if (!result || result.length === 0) {
             throw new Error(MESSAGES.PROCESSING_ERROR);
         }
 
-        incrementEndpointUsage('/reaging', 'POST');
-        respondWithImage(res, result, req.file.mimetype);
+        await incrementEndpointUsage('/reaging', 'POST');
+
+        // Set a custom header if the user has exceeded 20 API calls
+        if (shouldAlertUser) {
+            // console.log("User has exceeded 20 API calls");
+            res.setHeader('X-Alert', 'You have exceeded 20 API calls.');
+        }
+
+        res.contentType(req.file.mimetype).send(result); // Send the image as a Blob
     } catch (error) {
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     }
-    
 });
+
 
 router.post('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
     respondWithJSON(res, { message: "Welcome to the admin dashboard" });

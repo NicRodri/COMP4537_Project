@@ -5,7 +5,7 @@ require('dotenv').config();
 const API_URL = process.env.ML_URL;
 
 async function connectML(imageBuffer, auth_token) {
-    console.log("imageBuffer:", imageBuffer);
+    // console.log("imageBuffer:", imageBuffer);
     
     
     // Prepare the form data
@@ -14,7 +14,7 @@ async function connectML(imageBuffer, auth_token) {
     formData.append("source_age", "20");
     formData.append("target_age", "80");
 
-    console.log("formData:", formData);
+    // console.log("formData:", formData);
 
     // Set headers to include "auth-token"
     const headers = {
@@ -22,7 +22,7 @@ async function connectML(imageBuffer, auth_token) {
         "auth-token": auth_token  // Update header key to "auth-token"
     };
 
-    console.log("headers:", headers);
+    // console.log("headers:", headers);
 
     try {
         // Send the form data
