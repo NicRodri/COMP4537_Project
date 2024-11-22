@@ -125,9 +125,33 @@ async function fetchUserApiCalls() {
     }
 }
 
+async function deleteUser(userId) {
+    try {
+        const confirmation = confirm("Are you sure you want to delete this user?");
+        if (!confirmation) return;
+
+        const response = await fetch(`${API_PATH}/delete_user/${userId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            alert("User deleted successfully.");
+            await fetchUserApiCalls(); // Refresh the user table after deletion
+        } else {
+            console.error("Failed to delete user:", response.status, response.statusText);
+            alert("Failed to delete user. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("An error occurred while deleting the user.");
+    }
+}
+
 function displayUserApiCalls(data) {
     const tableBody = document.getElementById('user-api-table-body');
     tableBody.innerHTML = ''; // Clear existing data
+    console.log("User data:", data);    
 
     data.forEach((user) => {
         const row = document.createElement('tr');
@@ -144,9 +168,20 @@ function displayUserApiCalls(data) {
         apiCallsCell.textContent = user.api_call_count;
         row.appendChild(apiCallsCell);
 
+        // Add delete button
+        const deleteCell = document.createElement('td');
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'delete-button';
+        deleteButton.onclick = () => deleteUser(user.id); // Attach delete function
+        console.log("User ID:", user.id);
+        deleteCell.appendChild(deleteButton);
+        row.appendChild(deleteCell);
+
         tableBody.appendChild(row);
     });
 }
+
 
 // Fetch user API call data when the admin dashboard loads
 window.onload = async () => {
