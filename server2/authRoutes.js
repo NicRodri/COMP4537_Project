@@ -297,7 +297,7 @@ router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res)
 
         // Query to get user information along with API call counts
         const query = `
-            SELECT u.username, u.email, COALESCE(ua.api_call_count, 0) AS api_call_count
+            SELECT u.id, u.username, u.email, COALESCE(ua.api_call_count, 0) AS api_call_count
             FROM users u
             LEFT JOIN user_api_calls ua ON u.id = ua.user_id
             ORDER BY u.username;
@@ -314,5 +314,44 @@ router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res)
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+// Delete user route
+router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id; // Get user ID from the route parameter
+
+        if (!userId) {
+            return respondWithJSON(res, { message: MESSAGES.USER_ID_REQUIRED }, CONSTANTS.STATUS.BAD_REQUEST);
+        }
+
+        const connection = await initializeDB();
+
+        // Check if the user exists
+        const [user] = await connection.query(
+            'SELECT id FROM users WHERE id = ?',
+            [userId]
+        );
+
+        if (user.length === 0) {
+            return respondWithJSON(res, { message: MESSAGES.USER_NOT_FOUND }, CONSTANTS.STATUS.NOT_FOUND);
+        }
+
+        // Delete the user
+        await connection.query(
+            'DELETE FROM users WHERE id = ?',
+            [userId]
+        );
+
+        incrementEndpointUsage('/delete_user', 'DELETE');
+
+        respondWithJSON(res, {
+            message: `${MESSAGES.USER_DELETED_SUCCESS} (User ID: ${userId})`
+        }, CONSTANTS.STATUS.OK);
+    } catch (error) {
+        console.error("Error in delete_user route:", error.message);
+        respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    }
+});
+
 
 module.exports = router;
