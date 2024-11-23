@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const { setCorsMiddleware } = require('./modules/utils');
 const authRoutes = require('./authRoutes');
+const swaggerDocs = require('./documentation/swagger');
 
 const app = express();
 const PORT = 8080;
@@ -13,7 +14,10 @@ app.use(cookieParser());
 app.use(setCorsMiddleware);
 
 // Routes
-app.use('/', authRoutes);
+app.use('/api/v1', authRoutes);
+
+// Swagger documentation route
+app.use('/api-docs', swaggerDocs.serve, swaggerDocs.setup);
 
 // 404 handler
 app.use((req, res) => {
