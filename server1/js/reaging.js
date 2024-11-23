@@ -119,3 +119,27 @@ async function logout() {
         alert("An error occurred. Please try again.");
     }
 }
+
+// Fetch and display API usage for the logged-in user
+async function fetchApiUsage() {
+    try {
+        const response = await fetch(`${API_PATH}/user_api_usage`, {
+            method: 'GET',
+            credentials: 'include' // Include cookies in the request
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const apiUsageContainer = document.getElementById('apiUsage');
+            apiUsageContainer.textContent = `API Calls Used: ${data.apiCallCount}`;
+            apiUsageContainer.style.display = 'block';
+        } else {
+            console.error("Failed to fetch API usage:", response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error("Error fetching API usage:", error);
+    }
+}
+
+// Call the function to fetch and display API usage when the page loads
+fetchApiUsage();
