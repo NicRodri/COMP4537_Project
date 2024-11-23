@@ -53,6 +53,10 @@ async function fetchUsageData() {
         alert("An error occurred while fetching usage data.");
     }
 }
+function redirectToPage() {
+    window.location.href = 'http://127.0.0.1:5500/server1/reaging.html';
+}
+
 
 function displayUsageData(data) {
     if (!Array.isArray(data)) {
