@@ -13,18 +13,26 @@ let videoStream;
 function checkAuthentication() {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_PATH}/signedin`, true);
-    xhr.withCredentials = true;  // Include cookies in cross-origin requests
+    xhr.withCredentials = true; // Include cookies in cross-origin requests
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status >= 200 && xhr.status < 300) {
-                // User is authenticated
+                // Parse the response to check the user role
+                const response = JSON.parse(xhr.responseText);
+
+                if (response.user_type === 'admin') {
+                    // User is an admin; show the admin button
+                    document.getElementById('adminPageButton').style.display = 'block';
+                }
+
                 console.log("User is authenticated.");
-                // window.location.href = './reaging.html'; // Redirect to dashboard
+                // Optionally, redirect to the reaging page
+                // window.location.href = './reaging.html';
             } else {
                 // User is not authenticated
                 console.log("User is not authenticated.");
-                window.location.href = './index.html'; // Redirect to login pagez
+                window.location.href = './index.html'; // Redirect to login page
             }
         }
     };
@@ -32,7 +40,15 @@ function checkAuthentication() {
     xhr.send();
 }
 
-checkAuthentication();
+
+
+
+
+
+// Call this function when the page loads
+window.onload = async () => {
+    checkAuthentication();
+};
 
 // Start camera preview
 startCameraButton.addEventListener('click', async () => {
@@ -62,9 +78,15 @@ captureButton.addEventListener('click', () => {
 });
 
 sendButton.addEventListener('click', async () => {
+    // Get the loading spinner element
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
     snapshotCanvas.toBlob(async (blob) => {
         const formData = new FormData();
         formData.append('image', blob, 'captured-image.png');
+
+        // Show the loading spinner
+        loadingSpinner.style.display = 'block';
 
         try {
             const response = await fetch(`${API_PATH}/reaging`, {
@@ -75,7 +97,6 @@ sendButton.addEventListener('click', async () => {
 
             // Check for the custom alert header
             const alertMessage = response.headers.get('X-Alert');
-            console.log("Alert message:", alertMessage);
             if (alertMessage) {
                 alert(alertMessage); // Display the alert if present
             }
@@ -96,9 +117,13 @@ sendButton.addEventListener('click', async () => {
             }
         } catch (error) {
             console.error("Error sending image to API:", error);
+        } finally {
+            // Hide the loading spinner
+            loadingSpinner.style.display = 'none';
         }
     }, 'image/png');
 });
+
 
 
 async function logout() {
