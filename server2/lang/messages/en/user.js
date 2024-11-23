@@ -34,7 +34,7 @@ const MESSAGES = {
     SOCKET_PATH: '/run/mysqld/mysqld.sock',
     DEFAULT_IMAGE_TYPE: 'image/png',
     ALLOW_CREDENTIALS: "true",
-    ALLOW_METHODS: "POST, GET, OPTIONS, DELETE",
+    ALLOW_METHODS: "POST, GET, OPTIONS, DELETE, PATCH",
     ALLOW_HEADERS: "Content-Type, Authorization",
     OPTIONS_METHOD: "OPTIONS",
     LOGIN_SUCCESS: "Login successful",
