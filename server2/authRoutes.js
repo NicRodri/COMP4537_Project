@@ -660,7 +660,47 @@ router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, 
 });
 
 
-// Get API call usage for the logged-in user
+/**
+ * @swagger
+ * /api/v1/user_api_usage:
+ *   get:
+ *     tags: [User]
+ *     summary: Get API call usage for the logged-in user
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: API call usage retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 apiCallCount:
+ *                   type: integer
+ *                   description: Number of API calls made by the logged-in user
+ *                   example: 15
+ *       403:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Not authenticated
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
 router.get('/user_api_usage', validateToken, async (req, res) => {
     try {
         const connection = await pool.getConnection();
