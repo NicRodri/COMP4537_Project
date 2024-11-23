@@ -1,5 +1,5 @@
 // require('dotenv').config();
-const API_PATH = "http://homura.ca/api/v1/api/v1";  // Ensure the correct URL format
+const API_PATH = "https://homura.ca/api/v1/api/v1";  // Ensure the correct URL format
 console.log(API_PATH)
 const POST = "POST";
 

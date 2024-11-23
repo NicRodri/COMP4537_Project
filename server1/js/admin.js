@@ -1,5 +1,5 @@
 // admin.js
-const API_PATH = "http://homura.ca/api/v1";
+const API_PATH = "https://homura.ca/api/v1";
 
 async function checkAdminRole() {
     try {
