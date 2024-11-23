@@ -1,4 +1,4 @@
-const API_PATH = "http://localhost:8080/api/v1";
+const API_PATH = "http://homura.ca/api/v1/api/v1";
 const cameraPreview = document.getElementById('cameraPreview');
 const snapshotCanvas = document.getElementById('snapshotCanvas');
 const startCameraButton = document.getElementById('startCameraButton');
