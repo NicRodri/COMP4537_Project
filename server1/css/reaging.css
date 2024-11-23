@@ -1,8 +1,131 @@
+/* General Reset */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+h3 {
+    margin: 10px 0;
+    text-align: center;
+    color: #444;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.logout-button {
+    background-color: #dc3545;
+}
+
+.logout-button:hover {
+    background-color: #a71d2a;
+}
+
+/* Layout Styles */
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+}
+
+.image-container div {
+    margin: 10px 0;
+    width: 100%;
+    text-align: center;
+}
+
+#cameraPreview {
+    max-width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+#capturedImage,
+#resultImage {
+    max-width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+}
+
+#apiUsage {
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: center;
+    color: #007bff;
+}
+
 #loadingSpinner img {
     animation: spin 1s linear infinite;
+    display: inline-block;
 }
 
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Mobile-Friendly Adjustments */
+@media (max-width: 768px) {
+    body {
+        padding: 5px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+
+    .image-container {
+        flex-direction: column;
+    }
+
+    h3 {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .image-container div {
+        width: 100%;
+    }
+
+    h3 {
+        font-size: 14px;
+    }
+
+    #apiUsage {
+        font-size: 14px;
+    }
 }
