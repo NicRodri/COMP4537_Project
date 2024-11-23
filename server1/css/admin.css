@@ -72,7 +72,7 @@ p {
 #redirectButton {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #007BFF;
+    background-color: #00b31e;
     color: white;
     border: none;
     border-radius: 5px;
@@ -80,7 +80,78 @@ p {
 }
 
 #redirectButton:hover {
-    background-color: #0056b3;
+    background-color: #027615;
 }
 
+/* Button Styles in Table */
+.delete-button, .update-button {
+    padding: 0.5em 1em;
+    font-size: 0.9em;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
+.delete-button {
+    background-color: #d9534f; /* Red for delete */
+}
+
+.delete-button:hover {
+    background-color: #c9302c; /* Darker red on hover */
+}
+
+.update-button {
+    background-color: #007BFF; /* Blue for make admin/user */
+}
+
+.update-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Mobile-friendly adjustments */
+@media (max-width: 768px) {
+    body {
+        height: auto;
+        padding: 10px;
+    }
+
+    .dashboard-container {
+        width: 100%;
+        padding: 1em;
+        box-shadow: none;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    .logout-button, #redirectButton {
+        width: 100%;
+        padding: 0.8em;
+        font-size: 1em;
+    }
+
+    .usage-table {
+        font-size: 0.9em;
+    }
+
+    .usage-table th, .usage-table td {
+        padding: 6px;
+    }
+
+    .delete-button, .update-button {
+        padding: 0.4em 0.8em;
+        font-size: 0.8em;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
