@@ -31,13 +31,15 @@ const upload = multer({
 // Middleware to validate JWT token
 const validateToken = async (req, res, next) => {
     const token = req.cookies.authToken;
+    let connection;
     
     if (!token) {
         return respondWithJSON(res, { message: MESSAGES.NOT_AUTHENTICATED }, CONSTANTS.STATUS.FORBIDDEN);
     }
 
     try {
-        const connection = await initializeDB();
+        // Get a connection from the pool
+        connection = await pool.getConnection();
         const [blacklistedToken] = await connection.query(
             'SELECT * FROM token_blacklist WHERE token = ?',
             [token]
@@ -55,6 +57,8 @@ const validateToken = async (req, res, next) => {
             return respondWithJSON(res, { message: MESSAGES.TOKEN_EXPIRED }, CONSTANTS.STATUS.FORBIDDEN);
         }
         return respondWithJSON(res, { message: MESSAGES.INVALID_TOKEN }, CONSTANTS.STATUS.FORBIDDEN);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 };
 
@@ -110,6 +114,7 @@ const validateAdmin = (req, res, next) => {
  *         description: Username or email already exists
 */
 router.post('/register', async (req, res) => {
+    let connection;
     try {
         const { username, email, password } = req.body;
 
@@ -117,7 +122,7 @@ router.post('/register', async (req, res) => {
             return respondWithJSON(res, { message: MESSAGES.ALL_FIELDS_REQUIRED }, CONSTANTS.STATUS.BAD_REQUEST);
         }
 
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
 
         // Check existing user
         const [existingUsers] = await connection.query(
@@ -169,6 +174,8 @@ router.post('/register', async (req, res) => {
         }, CONSTANTS.STATUS.CREATED);
     } catch (error) {
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -212,10 +219,11 @@ router.post('/register', async (req, res) => {
  *         description: Invalid credentials
  */
 router.post('/login', async (req, res) => {
+    let connection;
     try {
         // console.log("Login route hit");
         const { email, password } = req.body;
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
         const [users] = await connection.query(
             'SELECT * FROM users WHERE email = ?',
             [email]
@@ -262,6 +270,8 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -289,9 +299,10 @@ router.post('/login', async (req, res) => {
  *         description: Not authenticated
  */
 router.post('/signedin', validateToken, async (req, res) => {
+    let connection;
     try {
         // console.log(req.user);
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
         const [userResult] = await connection.query(
             'SELECT user_type FROM users WHERE id = ?',
             [req.user.userId]
@@ -310,6 +321,8 @@ router.post('/signedin', validateToken, async (req, res) => {
 
     } catch (error) {
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -328,9 +341,10 @@ router.post('/signedin', validateToken, async (req, res) => {
  *         description: Not authenticated
  */
 router.get('/logout', validateToken, async (req, res) => {
+    let connection;
     try {
         const token = req.cookies.authToken;
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
         
         const decoded = jwt.decode(token);
         const expiryDate = new Date(decoded.exp * 1000);
@@ -346,6 +360,8 @@ router.get('/logout', validateToken, async (req, res) => {
         respondWithJSON(res, { message: MESSAGES.LOGOUT_SUCCESS });
     } catch (error) {
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 
 });
@@ -387,6 +403,7 @@ router.get('/logout', validateToken, async (req, res) => {
  *         description: Not authenticated
  */
 router.post('/reaging', validateToken, upload.single('image'), async (req, res) => {
+    let connection;
     try {
         const shouldAlertUser = await incrementUserApiCalls(req.user.userId);
 
@@ -413,6 +430,8 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
     } catch (error) {
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -455,6 +474,7 @@ router.post('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
  *         description: Not authorized
  */
 router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => {
+    let connection;
     try {
         const connection = await pool.getConnection();
         const query = `
@@ -470,6 +490,8 @@ router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => 
     } catch (err) {
         console.error("Error retrieving usage data:", err);
         res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -494,6 +516,7 @@ router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => 
  *         description: Not authorized
  */
 router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res) => {
+    let connection;
     try {
         const connection = await pool.getConnection();
 
@@ -514,6 +537,8 @@ router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res)
     } catch (err) {
         console.error("Error retrieving user API call counts:", err);
         res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -543,6 +568,7 @@ router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res)
  *         description: User not found
  */
 router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res) => {
+    let connection;
     try {
         const userId = req.params.id; // Get user ID from the route parameter
 
@@ -550,7 +576,7 @@ router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res)
             return respondWithJSON(res, { message: MESSAGES.USER_ID_REQUIRED }, CONSTANTS.STATUS.BAD_REQUEST);
         }
 
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
 
         // Check if the user exists
         const [user] = await connection.query(
@@ -576,6 +602,8 @@ router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res)
     } catch (error) {
         console.error("Error in delete_user route:", error.message);
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -618,6 +646,7 @@ router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res)
  *         description: User not found
  */
 router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, res) => {
+    let connection;
     try {
         const userId = req.params.id; // Get the user ID from the URL parameter
         const { role } = req.body;   // Get the new role from the request body
@@ -632,7 +661,7 @@ router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, 
             return respondWithJSON(res, { message: MESSAGES.INVALID_ROLE }, CONSTANTS.STATUS.BAD_REQUEST);
         }
 
-        const connection = await initializeDB();
+        connection = await pool.getConnection();
 
         // Check if the user exists
         const [user] = await connection.query(
@@ -656,6 +685,8 @@ router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, 
     } catch (error) {
         console.error("Error updating user role:", error.message);
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
@@ -702,6 +733,7 @@ router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, 
  *                   example: Internal server error
  */
 router.get('/user_api_usage', validateToken, async (req, res) => {
+    let connection;
     try {
         const connection = await pool.getConnection();
 
@@ -720,6 +752,8 @@ router.get('/user_api_usage', validateToken, async (req, res) => {
     } catch (err) {
         console.error("Error retrieving user API usage:", err);
         respondWithJSON(res, { error: 'Internal server error' }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    } finally {
+        if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
     }
 });
 
