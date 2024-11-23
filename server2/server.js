@@ -5,6 +5,9 @@ const { setCorsMiddleware } = require('./modules/utils');
 const authRoutes = require('./authRoutes');
 const swaggerDocs = require('./documentation/swagger');
 
+const initializeDB = require('./modules/connection');
+initializeDB();
+
 const app = express();
 const PORT = 8080;
 
