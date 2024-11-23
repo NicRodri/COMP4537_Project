@@ -660,6 +660,31 @@ router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, 
 });
 
 
+// Get API call usage for the logged-in user
+router.get('/user_api_usage', validateToken, async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+
+        const query = `
+            SELECT COALESCE(api_call_count, 0) AS api_call_count
+            FROM user_api_calls
+            WHERE user_id = ?;
+        `;
+
+        const [rows] = await connection.query(query, [req.user.userId]);
+        connection.release();
+
+        respondWithJSON(res, {
+            apiCallCount: rows.length > 0 ? rows[0].api_call_count : 0
+        });
+    } catch (err) {
+        console.error("Error retrieving user API usage:", err);
+        respondWithJSON(res, { error: 'Internal server error' }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    }
+});
+
+
+
 
 
 
