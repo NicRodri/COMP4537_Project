@@ -17,9 +17,8 @@ h3 {
     color: #444;
 }
 
+/* Button Styles */
 button {
-    background-color: #007bff;
-    color: #fff;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
@@ -28,17 +27,48 @@ button {
     font-size: 16px;
 }
 
-button:hover {
+/* Admin Dashboard Button */
+#adminPageButton {
+    background-color: #28a745; /* Green */
+    color: #fff;
+}
+
+#adminPageButton:hover {
+    background-color: #218838;
+}
+
+/* Camera Buttons with Shades of Blue */
+#startCameraButton {
+    background-color: #0056b3; /* Dark Blue */
+    color: #fff;
+}
+
+#startCameraButton:hover {
+    background-color: #003f82;
+}
+
+#captureButton {
+    background-color: #007bff; /* Medium Blue */
+    color: #fff;
+}
+
+#captureButton:hover {
     background-color: #0056b3;
 }
 
-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
+#sendButton {
+    background-color: #80caff; /* Light Blue */
+    color: #fff;
 }
 
+#sendButton:hover {
+    background-color: #4da9ff;
+}
+
+/* Logout Button */
 .logout-button {
-    background-color: #dc3545;
+    background-color: #dc3545; /* Red */
+    color: #fff;
 }
 
 .logout-button:hover {
