@@ -83,6 +83,7 @@ captureButton.addEventListener('click', () => {
 sendButton.addEventListener('click', async () => {
     // Get the loading spinner element
     const loadingSpinner = document.getElementById('loadingSpinner');
+    fetchApiUsage();
 
     snapshotCanvas.toBlob(async (blob) => {
         const formData = new FormData();
