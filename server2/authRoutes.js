@@ -65,8 +65,50 @@ const validateAdmin = (req, res, next) => {
         res.redirect('/index.html'); // Redirect to index.html if not authorized
     }
 };
-
-// Register new user
+/** 
+ * @swagger
+ * /api/v1/register:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Missing required fields
+ *       409:
+ *         description: Username or email already exists
+*/
 router.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -130,7 +172,45 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login
+ /**  
+ * @swagger
+ * /api/v1/login:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Login user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Invalid credentials
+ */
 router.post('/login', async (req, res) => {
     try {
         // console.log("Login route hit");
@@ -185,7 +265,29 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Check if signed in
+/**
+ * @swagger
+ * /api/v1/signedin:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Check if user is signed in
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: User is signed in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user_type:
+ *                   type: string
+ *       403:
+ *         description: Not authenticated
+ */
 router.post('/signedin', validateToken, async (req, res) => {
     try {
         // console.log(req.user);
@@ -211,7 +313,20 @@ router.post('/signedin', validateToken, async (req, res) => {
     }
 });
 
-// Logout
+/**
+ * @swagger
+ * /api/v1/logout:
+ *   get:
+ *     tags: [Authentication]
+ *     summary: Logout user
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully logged out
+ *       403:
+ *         description: Not authenticated
+ */
 router.get('/logout', validateToken, async (req, res) => {
     try {
         const token = req.cookies.authToken;
@@ -235,7 +350,42 @@ router.get('/logout', validateToken, async (req, res) => {
 
 });
 
-// Reaging endpoint
+ /**
+  * @swagger
+ * /api/v1/reaging:
+ *   post:
+ *     tags: [Image Processing]
+ *     summary: Process image for reaging
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Image processed successfully
+ *         content:
+ *           image/*:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *         headers:
+ *           X-Alert:
+ *             schema:
+ *               type: string
+ *             description: Alert message when user exceeds API call limit
+ *       400:
+ *         description: Invalid input or no file uploaded
+ *       403:
+ *         description: Not authenticated
+ */
 router.post('/reaging', validateToken, upload.single('image'), async (req, res) => {
     try {
         const shouldAlertUser = await incrementUserApiCalls(req.user.userId);
@@ -266,12 +416,44 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
     }
 });
 
-
+/**
+ * @swagger
+ * /api/v1/admin_dashboard:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Access admin dashboard
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully accessed admin dashboard
+ *       403:
+ *         description: Not authorized
+ */
 router.post('/admin_dashboard', validateToken, validateAdmin, (req, res) => {
     respondWithJSON(res, { message: "Welcome to the admin dashboard" });
 });
 
-// Separate route to get usage data
+/**
+ * @swagger
+ * /api/v1/get_usage_data:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Get API usage statistics
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of endpoint usage data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UsageData'
+ *       403:
+ *         description: Not authorized
+ */
 router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => {
     try {
         const connection = await pool.getConnection();
@@ -291,6 +473,26 @@ router.get('/get_usage_data', validateToken, validateAdmin, async (req, res) => 
     }
 });
 
+/**
+ *  @swagger
+ * /api/v1/get_user_api_calls:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Get API usage per user
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users with their API call counts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UserApiCalls'
+ *       403:
+ *         description: Not authorized
+ */
 router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res) => {
     try {
         const connection = await pool.getConnection();
@@ -315,7 +517,31 @@ router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res)
     }
 });
 
-// Delete user route
+/**
+ * @swagger
+ * /api/v1/delete_user/{id}:
+ *   delete:
+ *     tags: [Admin]
+ *     summary: Delete a user
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID to delete
+ *     responses:
+ *       200:
+ *         description: User successfully deleted
+ *       400:
+ *         description: Invalid user ID
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: User not found
+ */
 router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res) => {
     try {
         const userId = req.params.id; // Get user ID from the route parameter
@@ -353,6 +579,44 @@ router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res)
     }
 });
 
+
+/**
+ * @swagger
+ * /api/v1/update_user_role/{id}:
+ *   patch:
+ *     tags: [Admin]
+ *     summary: Update user role
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [user, admin]
+ *     responses:
+ *       200:
+ *         description: User role updated successfully
+ *       400:
+ *         description: Invalid role or user ID
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: User not found
+ */
 router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, res) => {
     try {
         const userId = req.params.id; // Get the user ID from the URL parameter
@@ -396,7 +660,47 @@ router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, 
 });
 
 
-// Get API call usage for the logged-in user
+/**
+ * @swagger
+ * /api/v1/user_api_usage:
+ *   get:
+ *     tags: [User]
+ *     summary: Get API call usage for the logged-in user
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: API call usage retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 apiCallCount:
+ *                   type: integer
+ *                   description: Number of API calls made by the logged-in user
+ *                   example: 15
+ *       403:
+ *         description: Not authenticated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Not authenticated
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
 router.get('/user_api_usage', validateToken, async (req, res) => {
     try {
         const connection = await pool.getConnection();
@@ -418,6 +722,8 @@ router.get('/user_api_usage', validateToken, async (req, res) => {
         respondWithJSON(res, { error: 'Internal server error' }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     }
 });
+
+
 
 
 
