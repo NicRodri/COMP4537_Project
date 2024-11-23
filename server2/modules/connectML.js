@@ -38,7 +38,7 @@ async function connectML(imageBuffer, auth_token) {
         if (contentType && contentType.includes("application/json")) {
             console.log("JSON Data received");
             const data = await response.json();
-            // console.log(data);
+            console.log(data);
             return data;
         } else if (contentType && contentType.includes("image")) {
             console.log("Image data received");
@@ -47,6 +47,7 @@ async function connectML(imageBuffer, auth_token) {
         } else {
             console.log("Other data received?");
             const textResponse = await response.text();
+            console.log(textResponse)
             return textResponse;
         }
     } catch (error) {
