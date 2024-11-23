@@ -46,3 +46,25 @@ p {
 .logout-button:hover {
     background-color: #c9302c;
 }
+
+/* admin.css */
+
+.admin-dashboard-container {
+    padding: 20px;
+}
+
+.usage-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.usage-table th, .usage-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.usage-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
