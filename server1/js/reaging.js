@@ -83,7 +83,6 @@ captureButton.addEventListener('click', () => {
 sendButton.addEventListener('click', async () => {
     // Get the loading spinner element
     const loadingSpinner = document.getElementById('loadingSpinner');
-    fetchApiUsage();
 
     snapshotCanvas.toBlob(async (blob) => {
         const formData = new FormData();
@@ -124,6 +123,7 @@ sendButton.addEventListener('click', async () => {
         } finally {
             // Hide the loading spinner
             loadingSpinner.style.display = 'none';
+            fetchApiUsage();
         }
     }, 'image/png');
 });
