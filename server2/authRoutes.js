@@ -269,6 +269,7 @@ router.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
+        console.log(error);
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     } finally {
         if (connection) connection.release(err => { if (err) console.error(err) }); // Release the connection back to the pool
