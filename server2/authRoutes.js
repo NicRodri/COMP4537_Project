@@ -297,7 +297,7 @@ router.get('/get_user_api_calls', validateToken, validateAdmin, async (req, res)
 
         // Query to get user information along with API call counts
         const query = `
-            SELECT u.id, u.username, u.email, COALESCE(ua.api_call_count, 0) AS api_call_count
+            SELECT u.id, u.username, u.email, u.user_type, COALESCE(ua.api_call_count, 0) AS api_call_count
             FROM users u
             LEFT JOIN user_api_calls ua ON u.id = ua.user_id
             ORDER BY u.username;
@@ -352,6 +352,49 @@ router.delete('/delete_user/:id', validateToken, validateAdmin, async (req, res)
         respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     }
 });
+
+router.patch('/update_user_role/:id', validateToken, validateAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id; // Get the user ID from the URL parameter
+        const { role } = req.body;   // Get the new role from the request body
+
+        // Validate input
+        if (!userId || !role) {
+            return respondWithJSON(res, { message: MESSAGES.ALL_FIELDS_REQUIRED }, CONSTANTS.STATUS.BAD_REQUEST);
+        }
+
+        // Only allow certain roles to be updated
+        if (!['admin', 'user'].includes(role)) {
+            return respondWithJSON(res, { message: MESSAGES.INVALID_ROLE }, CONSTANTS.STATUS.BAD_REQUEST);
+        }
+
+        const connection = await initializeDB();
+
+        // Check if the user exists
+        const [user] = await connection.query(
+            'SELECT id FROM users WHERE id = ?',
+            [userId]
+        );
+
+        if (user.length === 0) {
+            return respondWithJSON(res, { message: MESSAGES.USER_NOT_FOUND }, CONSTANTS.STATUS.NOT_FOUND);
+        }
+
+        // Update the user's role
+        await connection.query(
+            'UPDATE users SET user_type = ? WHERE id = ?',
+            [role, userId]
+        );
+
+        incrementEndpointUsage('/update_user_role', 'PATCH');
+
+        respondWithJSON(res, { message: `${MESSAGES.USER_ROLE_UPDATED} (User ID: ${userId}, Role: ${role})` }, CONSTANTS.STATUS.OK);
+    } catch (error) {
+        console.error("Error updating user role:", error.message);
+        respondWithJSON(res, { message: MESSAGES.INTERNAL_SERVER_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
+    }
+});
+
 
 
 module.exports = router;

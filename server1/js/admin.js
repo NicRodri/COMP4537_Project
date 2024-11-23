@@ -42,7 +42,7 @@ async function fetchUsageData() {
 
         if (response.ok) {
             const usageData = await response.json();
-            console.log("Usage data:", usageData);
+            // console.log("Usage data:", usageData);
             displayUsageData(usageData);
         } else {
             console.error("Failed to fetch usage data:", response.status, response.statusText);
@@ -113,7 +113,7 @@ async function fetchUserApiCalls() {
 
         if (response.ok) {
             const userData = await response.json();
-            console.log("User data:", userData);
+            // console.log("User data:", userData);
             displayUserApiCalls(userData);
         } else {
             console.error("Failed to fetch user data:", response.status, response.statusText);
@@ -151,7 +151,7 @@ async function deleteUser(userId) {
 function displayUserApiCalls(data) {
     const tableBody = document.getElementById('user-api-table-body');
     tableBody.innerHTML = ''; // Clear existing data
-    console.log("User data:", data);    
+    // console.log("User data:", data);    
 
     data.forEach((user) => {
         const row = document.createElement('tr');
@@ -168,19 +168,70 @@ function displayUserApiCalls(data) {
         apiCallsCell.textContent = user.api_call_count;
         row.appendChild(apiCallsCell);
 
+        const roleCell = document.createElement('td');
+        roleCell.textContent = user.user_type || 'user'; // Default role is 'user'
+        row.appendChild(roleCell);
+
         // Add delete button
         const deleteCell = document.createElement('td');
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'delete-button';
         deleteButton.onclick = () => deleteUser(user.id); // Attach delete function
-        console.log("User ID:", user.id);
+        // console.log("User ID:", user.id);
         deleteCell.appendChild(deleteButton);
         row.appendChild(deleteCell);
 
         tableBody.appendChild(row);
+
+        const updateCell = document.createElement('td');
+        const updateButton = document.createElement('button');
+        updateButton.className = 'update-button';
+
+        if (user.user_type === 'admin') {
+            updateButton.textContent = 'Make User'; // Button to demote admin to user
+            updateButton.onclick = () => updateUserRole(user.id, 'user'); // Call updateUserRole with 'user'
+        } else {
+            updateButton.textContent = 'Make Admin'; // Button to promote user to admin
+            updateButton.onclick = () => updateUserRole(user.id, 'admin'); // Call updateUserRole with 'admin'
+        }
+
+        updateCell.appendChild(updateButton);
+        row.appendChild(updateCell);
+
+        tableBody.appendChild(row);
     });
 }
+
+async function updateUserRole(userId, newRole) {
+    try {
+        console.log(`Updating user role to ${newRole}...`);
+        console.log("User ID:", userId);
+        const confirmation = confirm(`Are you sure you want to update this user to be an ${newRole}?`);
+        if (!confirmation) return;
+
+        const response = await fetch(`${API_PATH}/update_user_role/${userId}`, {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ role: newRole }), // Send the new role in the request body
+        });
+
+        if (response.ok) {
+            alert(`User role updated to ${newRole} successfully.`);
+            await fetchUserApiCalls(); // Refresh the user table after updating
+        } else {
+            console.error("Failed to update user role:", response.status, response.statusText);
+            alert("Failed to update user role. Please try again.");
+        }
+    } catch (error) {
+        console.error("Error updating user role:", error);
+        alert("An error occurred while updating the user role.");
+    }
+}
+
 
 
 // Fetch user API call data when the admin dashboard loads
