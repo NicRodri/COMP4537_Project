@@ -4,9 +4,9 @@ const { CONSTANTS } = require('../lang/messages/en/constants');
 const { MESSAGES } = require('../lang/messages/en/user');
 
 const poolConfig = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    user: process.env.DB_USER || 'Hikari',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'isa_project',
     waitForConnections: true,
     connectionLimit: CONSTANTS.CONNECTION_LIMIT,
     idleTimeout: CONSTANTS.IDLE_TIMEOUT, 
