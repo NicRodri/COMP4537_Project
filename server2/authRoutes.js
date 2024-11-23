@@ -429,6 +429,7 @@ router.post('/reaging', validateToken, upload.single('image'), async (req, res) 
 
         res.contentType(req.file.mimetype).send(result); // Send the image as a Blob
     } catch (error) {
+        console.log(error);
         console.error("Error in reaging route:", error.message);
         respondWithJSON(res, { message: MESSAGES.PROCESSING_ERROR }, CONSTANTS.STATUS.INTERNAL_SERVER_ERROR);
     } finally {
