@@ -20,7 +20,7 @@ const options = {
         description: 'Development server'
       },
       {
-        url: 'https://homura.ca',
+        url: 'https://homura.ca/COMP4537/project',
         description: 'Production server'
       }
     ],

@@ -1,5 +1,6 @@
 // admin.js
-const API_PATH = "http://localhost:8080/api/v1";
+const API_PATH = "https://homura.ca/COMP4537/project/api/v1";
+const frontEndPath = "https://homura.store/COMP4537_Project/server1/";
 
 async function checkAdminRole() {
     try {
@@ -54,7 +55,7 @@ async function fetchUsageData() {
     }
 }
 function redirectToPage() {
-    window.location.href = 'http://127.0.0.1:5500/server1/reaging.html';
+    window.location.href = `${frontEndPath}/reaging.html`;
 }
 
 

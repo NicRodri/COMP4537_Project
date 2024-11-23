@@ -1,4 +1,5 @@
-const API_PATH = "http://localhost:8080/api/v1";
+const API_PATH = "https://homura.ca/COMP4537/project/api/v1";
+const frontEndPath = "https://homura.store/COMP4537_Project/server1/";
 const cameraPreview = document.getElementById('cameraPreview');
 const snapshotCanvas = document.getElementById('snapshotCanvas');
 const startCameraButton = document.getElementById('startCameraButton');
@@ -32,7 +33,7 @@ function checkAuthentication() {
             } else {
                 // User is not authenticated
                 console.log("User is not authenticated.");
-                window.location.href = './index.html'; // Redirect to login page
+                window.location.href = `${frontEndPath}/index.html`; // Redirect to login page
             }
         }
     };
@@ -42,7 +43,9 @@ function checkAuthentication() {
 
 
 
-
+function redirectToAdminPage() {
+    window.location.href = './admin_dashboard.html';
+}
 
 
 // Call this function when the page loads
@@ -123,6 +126,8 @@ sendButton.addEventListener('click', async () => {
         }
     }, 'image/png');
 });
+
+
 
 
 

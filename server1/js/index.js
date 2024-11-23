@@ -1,4 +1,4 @@
-const API_PATH = "http://localhost:8080/api/v1";
+const API_PATH = "https://homura.ca/COMP4537/project/api/v1";
 
         class Authentication {
             constructor(apiPath) {
