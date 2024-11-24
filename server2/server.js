@@ -20,7 +20,7 @@ app.use(setCorsMiddleware);
 app.use('/api/v1', authRoutes);
 
 // Swagger documentation route
-app.use('/COMP4537/project/api-docs', swaggerDocs.serve, (req, res, next) => {
+app.use('/api-docs', swaggerDocs.serve, (req, res, next) => {
     console.log(`Swagger documentation available at: ${req.protocol}://${req.get('host')}${req.originalUrl}`);
     swaggerDocs.setup()(req, res, next);
 });
