@@ -74,7 +74,7 @@ async def process_image_api(
     target_age: int = Form(...),
     auth_token: str = Header(...)
 ):
-    # auth_token = verify_token(auth_token)
+    auth_token = verify_token(auth_token)
 
     image_data = await image.read()
     pil_image = Image.open(io.BytesIO(image_data)).convert("RGB")
