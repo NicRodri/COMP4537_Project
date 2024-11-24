@@ -4,20 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Request</title>
+    <link rel="stylesheet" href="./css/reaging.css">
 </head>
 <body>
+    <button id="adminPageButton" style="display: none;" onclick="redirectToAdminPage()">Admin Dashboard</button>
+
     <button class="logout-button" onclick="logout()">Log Out</button>
     <button id="startCameraButton">Start Camera</button>
     <button id="captureButton" style="display: none;">Capture Image</button>
     <button id="sendButton" style="display: none;">Send to API</button>
+    <div id="apiUsage" style="display: none; font-size: 16px; margin-top: 10px;"></div>
+
     <video id="cameraPreview" autoplay style="display: none;"></video>
     <canvas id="snapshotCanvas" style="display: none;"></canvas>
-
+    
     <div class="image-container">
         <div>
             <h3>Captured Image</h3>
             <img id="capturedImage" alt="Captured Image" style="display: none;">
         </div>
+        <div id="loadingSpinner" style="display: none; text-align: center; margin-top: 20px;">
+            <img src="spinner.gif" alt="Loading..." style="width: 50px; height: 50px;">
+        </div>
+        
         <div>
             <h3>Generated Image</h3>
             <img id="resultImage" alt="Generated Image" style="display: none;">

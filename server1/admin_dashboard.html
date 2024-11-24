@@ -7,14 +7,46 @@
     <link rel="stylesheet" href="./css/admin.css"> <!-- Link to external CSS -->
 </head>
 <body>
-    <script src="./js/admin.js"></script>
     <div id="admin-dashboard-content" class="admin-dashboard-container" style="display: none;">
         <h1>Welcome, Admin!</h1>
         <p>You are now logged into the admin dashboard.</p>
         <button class="logout-button" onclick="logout()">Log Out</button>
+        <button id="redirectButton" onclick="redirectToPage()">Go to Reaging Page</button>
+
+
+        <!-- Usage Data Table -->
+        <h2>Endpoint Usage Statistics</h2>
+        <table class="usage-table">
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Served Count</th>
+                </tr>
+            </thead>
+            <tbody id="usage-table-body">
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
+
+        <h2>User API Call Data</h2>
+        <table class="user-api-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>API Call Count</th>
+                    <th>User Role</th>
+                    <th>Action</th> <!-- New column for actions -->
+                </tr>
+            </thead>
+            <tbody id="user-api-table-body">
+                <!-- User data will be populated here -->
+            </tbody>
+        </table>
+
     </div>
 
     <script src="./js/admin.js"></script>
-    
 </body>
 </html>

@@ -1,4 +1,5 @@
-const API_PATH = "https://homura.ca/COMP4537/project";
+const API_PATH = "https://homura.ca/COMP4537/project/api/v1";
+const frontEndPath = "https://homura.store/COMP4537_Project/server1/";
 const cameraPreview = document.getElementById('cameraPreview');
 const snapshotCanvas = document.getElementById('snapshotCanvas');
 const startCameraButton = document.getElementById('startCameraButton');
@@ -13,18 +14,26 @@ let videoStream;
 function checkAuthentication() {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${API_PATH}/signedin`, true);
-    xhr.withCredentials = true;  // Include cookies in cross-origin requests
+    xhr.withCredentials = true; // Include cookies in cross-origin requests
 
     xhr.onreadystatechange = () => {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status >= 200 && xhr.status < 300) {
-                // User is authenticated
+                // Parse the response to check the user role
+                const response = JSON.parse(xhr.responseText);
+
+                if (response.user_type === 'admin') {
+                    // User is an admin; show the admin button
+                    document.getElementById('adminPageButton').style.display = 'block';
+                }
+
                 console.log("User is authenticated.");
-                // window.location.href = './reaging.html'; // Redirect to dashboard
+                // Optionally, redirect to the reaging page
+                // window.location.href = './reaging.html';
             } else {
                 // User is not authenticated
                 console.log("User is not authenticated.");
-                window.location.href = './index.html'; // Redirect to login page
+                window.location.href = `${frontEndPath}/index.html`; // Redirect to login page
             }
         }
     };
@@ -32,7 +41,17 @@ function checkAuthentication() {
     xhr.send();
 }
 
-checkAuthentication();
+
+
+function redirectToAdminPage() {
+    window.location.href = './admin_dashboard.html';
+}
+
+
+// Call this function when the page loads
+window.onload = async () => {
+    checkAuthentication();
+};
 
 // Start camera preview
 startCameraButton.addEventListener('click', async () => {
@@ -62,10 +81,15 @@ captureButton.addEventListener('click', () => {
 });
 
 sendButton.addEventListener('click', async () => {
+    // Get the loading spinner element
+    const loadingSpinner = document.getElementById('loadingSpinner');
+
     snapshotCanvas.toBlob(async (blob) => {
         const formData = new FormData();
         formData.append('image', blob, 'captured-image.png');
-        console.log(formData);
+
+        // Show the loading spinner
+        loadingSpinner.style.display = 'block';
 
         try {
             const response = await fetch(`${API_PATH}/reaging`, {
@@ -74,34 +98,40 @@ sendButton.addEventListener('click', async () => {
                 credentials: 'include'
             });
 
-            if (response.ok) {
-                // **Modified code starts here**
-                // Handle the response as a Blob since the server is returning image data
-                const imageBlob = await response.blob();
+            // Check for the custom alert header
+            const alertMessage = response.headers.get('X-Alert');
+            if (alertMessage) {
+                alert(alertMessage); // Display the alert if present
+            }
 
-                // Create a local URL of that image
+            if (response.ok) {
+                // Handle the response as a Blob to display the image
+                const imageBlob = await response.blob();
                 const imageObjectURL = URL.createObjectURL(imageBlob);
 
-                // Display the image in the resultImage element
                 resultImage.src = imageObjectURL;
                 resultImage.style.display = 'block';
 
-                // Optional: Revoke the object URL after the image has loaded
                 resultImage.onload = () => {
                     URL.revokeObjectURL(imageObjectURL);
                 };
-
-                console.log("Image received and displayed.");
-                // **Modified code ends here**
             } else {
-                console.log(response);
                 console.error("Error:", response.status, response.statusText);
             }
         } catch (error) {
             console.error("Error sending image to API:", error);
+        } finally {
+            // Hide the loading spinner
+            loadingSpinner.style.display = 'none';
+            fetchApiUsage();
         }
     }, 'image/png');
 });
+
+
+
+
+
 async function logout() {
     try {
         const response = await fetch(`${API_PATH}/logout`, {
@@ -120,3 +150,27 @@ async function logout() {
         alert("An error occurred. Please try again.");
     }
 }
+
+// Fetch and display API usage for the logged-in user
+async function fetchApiUsage() {
+    try {
+        const response = await fetch(`${API_PATH}/user_api_usage`, {
+            method: 'GET',
+            credentials: 'include' // Include cookies in the request
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const apiUsageContainer = document.getElementById('apiUsage');
+            apiUsageContainer.textContent = `API Calls Used: ${data.apiCallCount}`;
+            apiUsageContainer.style.display = 'block';
+        } else {
+            console.error("Failed to fetch API usage:", response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error("Error fetching API usage:", error);
+    }
+}
+
+// Call the function to fetch and display API usage when the page loads
+fetchApiUsage();
