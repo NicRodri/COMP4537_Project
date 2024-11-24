@@ -49,7 +49,8 @@ module.exports = {
       docExpansion: 'none',
       filter: true,
       tagsSorter: 'alpha',
-      operationsSorter: 'alpha'
+      operationsSorter: 'alpha',
+      basePath: '/COMP4537/project/api-docs', // Explicitly set base path
     }
   })
 };
