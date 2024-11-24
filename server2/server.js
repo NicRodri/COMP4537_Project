@@ -20,7 +20,7 @@ app.use(setCorsMiddleware);
 app.use('/api/v1', authRoutes);
 
 // Swagger documentation route
-app.use('/api-docs', swaggerDocs.serve, swaggerDocs.setup);
+app.use('/COMP4537/project/api-docs', swaggerDocs.serve, swaggerDocs.setup);
 
 // 404 handler
 app.use((req, res) => {

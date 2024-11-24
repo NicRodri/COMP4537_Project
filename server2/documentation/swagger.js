@@ -11,7 +11,7 @@ const options = {
       description: 'API documentation for user authentication, management, and image processing system',
       contact: {
         name: 'API Support',
-        email: 'support@yourdomain.com'
+        email: 'homura@homura.ca'
       },
     },
     servers: [
