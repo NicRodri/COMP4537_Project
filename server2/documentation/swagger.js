@@ -35,7 +35,7 @@ const options = {
       }
     }
   },
-  apis: ['./server2/authRoutes.js'], // Path to the API routes
+  apis: [path.resolve(__dirname, '../authRoutes.js')], // Resolve relative to the current file
 };
 
 // Log the API file paths
