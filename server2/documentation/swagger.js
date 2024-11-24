@@ -1,6 +1,7 @@
 // swagger.js
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 
 const options = {
   definition: {
@@ -34,8 +35,11 @@ const options = {
       }
     }
   },
-  apis: ['./server2/*.js'], // Path to the API routes
+  apis: ['./server2/authRoutes.js'], // Path to the API routes
 };
+
+// Log the API file paths
+console.log('Swagger API files:', options.apis.map(file => path.resolve(file)));
 
 const specs = swaggerJsdoc(options);
 
